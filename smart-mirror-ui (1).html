@@ -15,7 +15,7 @@
     --text-primary: rgba(255,255,255,0.95);
     --text-dim: rgba(255,255,255,0.38);
     --bg: #0000;
-    //#060a0c;
+    /*#060a0c;*/
     --red: #ff4d6a;
     --blue: #7ab8ff;
   }
@@ -57,8 +57,8 @@
   .mirror-frame {
     position: fixed;
     inset: 0;
-   // background: linear-gradient(155deg, rgba(14,20,26,0.97) 0%, rgba(6,10,14,1) 100%);
-   background-color: #000;
+    /* background: linear-gradient(155deg, rgba(14,20,26,0.97) 0%, rgba(6,10,14,1) 100%);*/
+    background-color: #000;
     overflow: hidden;
     z-index: 1;
   }
@@ -680,7 +680,7 @@
     </div>
 
     <!-- Exercise Tag -->
-    <div class="exercise-tag">▶ Start</div>
+    <div class="exercise-tag" id="exerciseTag">▶ Start</div>
 <div class= "user-name">
   <h2>Hi</h2>
   <h1>Mohamed Tawfik</h1>
@@ -814,8 +814,8 @@
         </svg>
       </div>
       <div class="feedback-text">
-        <strong>Form OK</strong>
-        Keep back straight. Lower to 90° for best results. Target 50 reps total.
+        <strong id="formStatus">Form OK</strong>
+        <span id="formTip">Keep back straight. Lower to 90° for best results. Target 50 reps total.</span>
       </div>
     </div>
 
@@ -856,7 +856,85 @@
 
   </div>
 </div>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+  // Live clock
+  function tick() {
+    document.getElementById('clockVal').textContent =
+      new Date().toTimeString().slice(0,8);
+  }
+  setInterval(tick, 1000); tick();
 
+  // Heart rate fluctuation
+  setInterval(() => {
+    document.getElementById('bpmVal').textContent =
+      85 + Math.floor(Math.random() * 12) - 5;
+  }, 2000);
+
+  // Timer counting up
+  let secs = 24 * 60 + 33;
+  setInterval(() => {
+    secs++;
+    const m = String(Math.floor(secs / 60)).padStart(2,'0');
+    const s = String(secs % 60).padStart(2,'0');
+    document.getElementById('timerVal').textContent = `${m}:${s}`;
+  }, 1000);
+
+  // ===== Socket.IO Realtime =====
+  const BACKEND_URL = "http://localhost:3000";
+
+  const TOKEN = "";
+  const USER_ID = ""; 
+  const socket = io(BACKEND_URL, {
+    auth: { token: TOKEN },
+    transports: ["websocket"],
+  });
+
+  socket.on("connect", () => {
+    console.log("dashboard connected:", socket.id);
+    socket.emit("room:join", { userId: USER_ID });
+  });
+
+  socket.on("connect_error", (err) => {
+    console.log("connect_error:", err?.message);
+  });
+
+  socket.on("workout:progress", (p) => {
+    // 1) reps
+    const repsEl = document.getElementById("repCount");
+    if (repsEl) {
+      repsEl.textContent = String(p.reps ?? 0);
+      repsEl.style.animation = 'none';
+      repsEl.offsetHeight;
+      repsEl.style.animation = 'countUp 0.3s ease';
+    }
+
+    // 2) exercise type
+    const ex = (p.exerciseType || "start").toUpperCase();
+    const tag = document.getElementById("exerciseTag");
+    if (tag) tag.textContent = `▶ ${ex}`;
+
+    // 3) form status + tip
+    const score = Number(p.formScore ?? 0);
+    const status = document.getElementById("formStatus");
+    if (status) status.textContent = score >= 75 ? "Form OK" : "Fix Form";
+
+    const tip = document.getElementById("formTip");
+    const m = p.mistakes?.[0]?.type;
+
+    const tips = {
+      knees_in: "Keep knees out.",
+      back_round: "Keep back straight.",
+      shallow: "Go lower (aim ~90°).",
+    };
+    if (tip) tip.textContent = tips[m] || "Keep steady and controlled.";
+
+    // 4) formScore in top left (optional)
+    const formVal = document.getElementById("formScoreVal");
+    if (formVal) formVal.textContent = String(score);
+  });
+</script>
+<!--
 <script>
   // Live clock
   function tick() {
@@ -891,5 +969,6 @@
     document.getElementById('timerVal').textContent = `${m}:${s}`;
   }, 1000);
 </script>
+-->
 </body>
 </html>
