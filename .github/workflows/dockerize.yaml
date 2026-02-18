@@ -24,7 +24,7 @@ jobs:
             
             - name: Tag
               run: |
-                docker tag ${{ secrets.DOCKERHUB_USERNAME }}/smart-mirror-dashboard:Latest /
+                docker tag ${{ secrets.DOCKERHUB_USERNAME }}/smart-mirror-dashboard:Latest \
                 ${{ secrets.DOCKERHUB_USERNAME }}/smart-mirror-dashboard:${GITHUB_SHA::7}
                 echo "Tagging complete"
 
