@@ -1,7 +1,7 @@
 // Live clock
 function tick() {
   document.getElementById('clockVal').textContent =
-    new Date().toTimeString().slice(0,8);
+    new Date().toTimeString().slice(0, 8);
 }
 setInterval(tick, 1000); tick();
 
@@ -15,16 +15,16 @@ setInterval(() => {
 let secs = 24 * 60 + 33;
 setInterval(() => {
   secs++;
-  const m = String(Math.floor(secs / 60)).padStart(2,'0');
-  const s = String(secs % 60).padStart(2,'0');
+  const m = String(Math.floor(secs / 60)).padStart(2, '0');
+  const s = String(secs % 60).padStart(2, '0');
   document.getElementById('timerVal').textContent = `${m}:${s}`;
 }, 1000);
 
 // ===== Socket.IO Realtime =====
-const BACKEND_URL = "http://localhost:3000";
+const BACKEND_URL = window.env?.BACKEND_URL || "http://localhost:3000";
 
 const TOKEN = "";
-const USER_ID = ""; 
+const USER_ID = "";
 const socket = io(BACKEND_URL, {
   auth: { token: TOKEN },
   transports: ["websocket"],
