@@ -19,7 +19,7 @@ jobs:
 
             - name: Build
               run: |
-                docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/smart-mirror-dashboard:Latest 
+                docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/smart-mirror-dashboard:Latest .
                 echo "Build complete"
             
             - name: Tag
