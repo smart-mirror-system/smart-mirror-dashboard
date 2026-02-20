@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  html_lint:
+  proof:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -27,7 +27,7 @@ jobs:
           directory: .
 
   build:
-    needs: html_lint
+    needs: proof
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -54,7 +54,7 @@ jobs:
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/smart-mirror-dashboard:${GITHUB_SHA::7}
 
   deploy_on_github_pages:
-    needs: html_lint
+    needs: proof
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -74,7 +74,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: './public_site/'
 
       - name: Deploy to GitHub Pages
         id: deployment
