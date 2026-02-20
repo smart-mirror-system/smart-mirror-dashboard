@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect x="0" y="0" width="64" height="64" rx="12" fill="#050505" />
+  
+  <!-- Border with slight glow -->
+  <rect x="2" y="2" width="60" height="60" rx="10" 
+        fill="none" stroke="#333" stroke-width="1.5" />
+        
+  <!-- Heartbeat Pulse -->
+  <path d="M8 32 L18 32 L24 44 L32 16 L40 40 L46 32 L56 32" 
+        fill="none" 
+        stroke="#FF3B30" 
+        stroke-width="3" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        filter="url(#glow)" />
+        
+  <!-- Secondary elements for futuristic look -->
+  <circle cx="56" cy="14" r="1.5" fill="#FFF" opacity="0.8" />
+  <rect x="8" y="50" width="12" height="2" fill="#FFF" opacity="0.3" rx="1" />
+</svg>
