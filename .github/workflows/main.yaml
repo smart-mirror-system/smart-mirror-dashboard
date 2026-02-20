@@ -1,8 +1,8 @@
 on:
   push: 
-      branches: ["devops"]
+      branches: ["devops","main"]
   pull_request:
-      branches: ["devops"]
+      branches: ["devops","main"]
 
 permissions:
   contents: read
