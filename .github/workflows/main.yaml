@@ -1,0 +1,81 @@
+on:
+  push: 
+      branches: ["devops","main"]
+  pull_request:
+      branches: ["devops","main"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6.0.2
+      
+      # using sha for security purposes
+      - name: Proof HTML
+        uses: anishathalye/proof-html@a76b66427e600c6992e8937a741afffd2264a613
+        with:
+          directory: .
+
+  build:
+    needs: proof
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6.0.2
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3.7.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/smart-mirror-dashboard:latest .
+
+      - name: Tag
+        run: |
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/smart-mirror-dashboard:latest \
+              ${{ secrets.DOCKERHUB_USERNAME }}/smart-mirror-dashboard:${GITHUB_SHA::7}
+
+      - name: Push
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/smart-mirror-dashboard:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/smart-mirror-dashboard:${GITHUB_SHA::7}
+
+  deploy_on_github_pages:
+    needs: proof
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Cleanup unwanted files
+        run: |
+          sed -i 's/\r$//' .pagesignore
+          xargs -a .pagesignore rm -rf
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
