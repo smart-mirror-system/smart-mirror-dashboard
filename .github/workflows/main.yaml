@@ -63,10 +63,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.2
 
-      - name: Prepare Website
+      - name: Cleanup unwanted files
         run: |
-          mkdir -p ./public_site
-          cp -r -v *.html css/ js/ img/ ./public_site/
+          sed -i 's/\r$//' .pagesignore
+          xargs -a .pagesignore rm -rf
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
