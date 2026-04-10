@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Mirror — Configuration</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="css/settings-style.css">
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+  <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"/>
+    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+  </svg>
+  <span id="themeLabel">Light Mode</span>
+</button>
+
+<div class="config-container">
+
+  <!-- Header -->
+  <div class="config-header">
+    <div class="header-logo">
+      <svg class="logo-icon" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="14" stroke="white" stroke-width="2"/>
+        <path d="M12 16L15 19L20 14" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h1 class="header-title" data-t="headerTitle">Smart Mirror Setup</h1>
+    <p class="header-subtitle" data-t="headerSubtitle">Configure your personalized fitness experience</p>
+  </div>
+
+  <!-- Step Progress -->
+  <div class="step-progress" id="stepProgress">
+    <div class="step-item active" id="si-0"><div class="step-dot active" id="sd-0">1</div><div class="step-label" data-t="tabAccount">Account</div></div>
+    <div class="step-line" id="sl-0"></div>
+    <div class="step-item" id="si-1"><div class="step-dot" id="sd-1">2</div><div class="step-label" data-t="tabLanguage">Language</div></div>
+    <div class="step-line" id="sl-1"></div>
+    <div class="step-item" id="si-2"><div class="step-dot" id="sd-2">3</div><div class="step-label" data-t="tabTraining">Training</div></div>
+    <div class="step-line" id="sl-2"></div>
+    <div class="step-item" id="si-3"><div class="step-dot" id="sd-3">4</div><div class="step-label" data-t="tabPreferences">Preferences</div></div>
+    <div class="step-line" id="sl-3"></div>
+    <div class="step-item" id="si-4"><div class="step-dot" id="sd-4">5</div><div class="step-label" data-t="tabProfile">Profile</div></div>
+  </div>
+
+  <!-- ═══ STEP 1: ACCOUNT ═══ -->
+  <div class="step-panel active" id="step-0">
+    <div class="card">
+      <h2 class="card-title" id="authTitle" data-t="authTitleRegister">Create Your Account</h2>
+      <p class="card-desc" data-t="authDesc">Get started with your personalized fitness journey</p>
+      <div class="success-msg" id="successMsg">
+        <span>✓</span><span data-t="successMsg">Account created successfully!</span>
+      </div>
+      <div class="form-group" id="nameField">
+        <label class="form-label" data-t="authNameLabel">Full Name</label>
+        <input type="text" class="form-input" id="fullName" data-ph="authNamePlaceholder" placeholder="John Doe">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="authEmailLabel">Email Address</label>
+        <input type="email" class="form-input" id="emailInput" data-ph="authEmailPlaceholder" placeholder="john@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="authPasswordLabel">Password</label>
+        <input type="password" class="form-input" id="passInput" data-ph="authPasswordPlaceholder" placeholder="••••••••">
+      </div>
+      <div class="form-group" id="confirmField">
+        <label class="form-label" data-t="authConfirmLabel">Confirm Password</label>
+        <input type="password" class="form-input" id="confirmInput" data-ph="authPasswordPlaceholder" placeholder="••••••••">
+      </div>
+      <div class="auth-toggle">
+        <span id="authToggleText" data-t="authToggleRegister">Already have an account?</span>
+        <a href="#" id="authToggleLink" data-t="authLinkRegister"> Sign In</a>
+      </div>
+    </div>
+    <div class="wizard-nav">
+      <div class="nav-left"></div>
+      <span class="step-counter" data-step="1"></span>
+      <div class="nav-right">
+        <button class="btn btn-primary" onclick="goNext()" data-t="btnNext">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 2: LANGUAGE ═══ -->
+  <div class="step-panel" id="step-1">
+    <div class="card">
+      <h2 class="card-title" data-t="langTitle">Language Preferences</h2>
+      <p class="card-desc" data-t="langDesc">Choose your preferred language and region settings</p>
+      <div class="form-group">
+        <label class="form-label" data-t="langDisplayLabel">Display Language</label>
+        <select class="form-select" id="langSelect" onchange="onLangChange(this.value)">
+          <option value="en">English</option>
+          <option value="ar">العربية (Arabic)</option>
+          <option value="es">Español (Spanish)</option>
+          <option value="fr">Français (French)</option>
+          <option value="de">Deutsch (German)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="langVoiceLabel">Voice Feedback Language</label>
+        <select class="form-select">
+          <option value="en-US">English (US)</option>
+          <option value="en-GB">English (UK)</option>
+          <option value="ar-SA">Arabic</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-t="langUnitsLabel">Units</label>
+          <select class="form-select">
+            <option value="metric"   data-t="langUnitsMetric">Metric (kg, cm)</option>
+            <option value="imperial" data-t="langUnitsImperial">Imperial (lb, in)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-t="langTimeLabel">Time Format</label>
+          <select class="form-select">
+            <option value="12h" data-t="langTime12">12-hour</option>
+            <option value="24h" data-t="langTime24">24-hour</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="wizard-nav">
+      <div class="nav-left"><button class="btn" onclick="goPrev()" data-t="btnBack">← Back</button></div>
+      <span class="step-counter" data-step="2"></span>
+      <div class="nav-right"><button class="btn btn-primary" onclick="goNext()" data-t="btnNext">Next →</button></div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 3: TRAINING ═══ -->
+  <div class="step-panel" id="step-2">
+    <div class="card">
+      <h2 class="card-title" data-t="trainingTitle">Training Type</h2>
+      <p class="card-desc" data-t="trainingDesc">Select your primary workout focus</p>
+      <div class="option-grid">
+        <div class="option-card" data-group="training" data-val="strength" onclick="selectOption(this)">
+          <div class="option-icon">💪</div>
+          <div class="option-title" data-t="trainingStrength">Strength Training</div>
+          <div class="option-desc"  data-t="trainingStrengthDesc">Build muscle and power</div>
+        </div>
+        <div class="option-card selected" data-group="training" data-val="cardio" onclick="selectOption(this)">
+          <div class="option-icon">🏃</div>
+          <div class="option-title" data-t="trainingCardio">Cardio</div>
+          <div class="option-desc"  data-t="trainingCardioDesc">Improve endurance</div>
+        </div>
+        <div class="option-card" data-group="training" data-val="yoga" onclick="selectOption(this)">
+          <div class="option-icon">🧘</div>
+          <div class="option-title" data-t="trainingYoga">Yoga &amp; Flexibility</div>
+          <div class="option-desc"  data-t="trainingYogaDesc">Enhance mobility</div>
+        </div>
+        <div class="option-card" data-group="training" data-val="hiit" onclick="selectOption(this)">
+          <div class="option-icon">⚡</div>
+          <div class="option-title" data-t="trainingHiit">HIIT</div>
+          <div class="option-desc"  data-t="trainingHiitDesc">High-intensity intervals</div>
+        </div>
+        <div class="option-card" data-group="training" data-val="sports" onclick="selectOption(this)">
+          <div class="option-icon">⚽</div>
+          <div class="option-title" data-t="trainingSports">Sports Training</div>
+          <div class="option-desc"  data-t="trainingSportsDesc">Sport-specific drills</div>
+        </div>
+        <div class="option-card" data-group="training" data-val="mixed" onclick="selectOption(this)">
+          <div class="option-icon">🔄</div>
+          <div class="option-title" data-t="trainingMixed">Mixed Training</div>
+          <div class="option-desc"  data-t="trainingMixedDesc">Balanced approach</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="card-title" data-t="levelTitle">Fitness Level</h2>
+      <p class="card-desc" data-t="levelDesc">Help us tailor your workouts</p>
+      <div class="option-grid">
+        <div class="option-card" data-group="level" data-val="beginner" onclick="selectOption(this)">
+          <div class="option-icon">🌱</div>
+          <div class="option-title" data-t="levelBeginner">Beginner</div>
+          <div class="option-desc"  data-t="levelBeginnerDesc">Starting my journey</div>
+        </div>
+        <div class="option-card selected" data-group="level" data-val="intermediate" onclick="selectOption(this)">
+          <div class="option-icon">🔥</div>
+          <div class="option-title" data-t="levelIntermediate">Intermediate</div>
+          <div class="option-desc"  data-t="levelIntermediateDesc">Regular workouts</div>
+        </div>
+        <div class="option-card" data-group="level" data-val="advanced" onclick="selectOption(this)">
+          <div class="option-icon">🏆</div>
+          <div class="option-title" data-t="levelAdvanced">Advanced</div>
+          <div class="option-desc"  data-t="levelAdvancedDesc">Experienced athlete</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="weeklyGoalsLabel">Weekly Training Goals</label>
+        <select class="form-select">
+          <option value="2-3"    data-t="weeklyGoals23">2-3 sessions per week</option>
+          <option value="4-5"    data-t="weeklyGoals45" selected>4-5 sessions per week</option>
+          <option value="6-7"    data-t="weeklyGoals67">6-7 sessions per week</option>
+          <option value="custom" data-t="weeklyGoalsCustom">Custom schedule</option>
+        </select>
+      </div>
+    </div>
+    <div class="wizard-nav">
+      <div class="nav-left"><button class="btn" onclick="goPrev()" data-t="btnBack">← Back</button></div>
+      <span class="step-counter" data-step="3"></span>
+      <div class="nav-right"><button class="btn btn-primary" onclick="goNext()" data-t="btnNext">Next →</button></div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 4: PREFERENCES ═══ -->
+  <div class="step-panel" id="step-3">
+    <div class="card">
+      <h2 class="card-title" data-t="prefDisplayTitle">Display Settings</h2>
+      <p class="card-desc" data-t="prefDisplayDesc">Customize your mirror interface</p>
+      <div class="toggle-group">
+        <div><div class="toggle-label" data-t="prefHeartRate">Show Heart Rate Monitor</div><div class="toggle-desc" data-t="prefHeartRateDesc">Display real-time heart rate data</div></div>
+        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-group">
+        <div><div class="toggle-label" data-t="prefCalories">Show Calorie Counter</div><div class="toggle-desc" data-t="prefCaloriesDesc">Track calories burned during workout</div></div>
+        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-group">
+        <div><div class="toggle-label" data-t="prefSkeleton">Show Skeleton Tracking</div><div class="toggle-desc" data-t="prefSkeletonDesc">Real-time form analysis overlay</div></div>
+        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-group">
+        <div><div class="toggle-label" data-t="prefReps">Show Rep Counter</div><div class="toggle-desc" data-t="prefRepsDesc">Automatic repetition counting</div></div>
+        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="card-title" data-t="prefAudioTitle">Audio &amp; Voice</h2>
+      <p class="card-desc" data-t="prefAudioDesc">Configure audio feedback settings</p>
+      <div class="toggle-group">
+        <div><div class="toggle-label" data-t="prefVoice">Voice Coaching</div><div class="toggle-desc" data-t="prefVoiceDesc">Get audio guidance during workouts</div></div>
+        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-group">
+        <div><div class="toggle-label" data-t="prefAlerts">Form Correction Alerts</div><div class="toggle-desc" data-t="prefAlertsDesc">Audio alerts for improper form</div></div>
+        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-group">
+        <div><div class="toggle-label" data-t="prefMotivation">Motivational Prompts</div><div class="toggle-desc" data-t="prefMotivationDesc">Encouragement during tough sets</div></div>
+        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-group">
+        <div><div class="toggle-label" data-t="prefMusic">Background Music</div><div class="toggle-desc" data-t="prefMusicDesc">Play music during workouts</div></div>
+        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+      </div>
+    </div>
+    <div class="wizard-nav">
+      <div class="nav-left"><button class="btn" onclick="goPrev()" data-t="btnBack">← Back</button></div>
+      <span class="step-counter" data-step="4"></span>
+      <div class="nav-right"><button class="btn btn-primary" onclick="goNext()" data-t="btnNext">Next →</button></div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 5: PROFILE ═══ -->
+  <div class="step-panel" id="step-4">
+    <div class="card">
+      <h2 class="card-title" data-t="profileTitle">Your Profile</h2>
+      <p class="card-desc" data-t="profileDesc">Personal information and fitness data</p>
+      <div class="profile-avatar">JD<div class="avatar-edit">📷</div></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-t="profileFirstName">First Name</label>
+          <input type="text" class="form-input" id="p_first" value="John">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-t="profileLastName">Last Name</label>
+          <input type="text" class="form-input" id="p_last" value="Doe">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-t="profileAge">Age</label>
+          <input type="number" class="form-input" id="p_age" value="28">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-t="profileGender">Gender</label>
+          <select class="form-select" id="p_gender">
+            <option value="male"   data-t="profileGenderMale">Male</option>
+            <option value="female" data-t="profileGenderFemale">Female</option>
+            <option value="other"  data-t="profileGenderOther">Other</option>
+            <option value="prefer" data-t="profileGenderPrefer">Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-t="profileHeight">Height (cm)</label>
+          <input type="number" class="form-input" id="p_height" value="175">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-t="profileWeight">Weight (kg)</label>
+          <input type="number" class="form-input" id="p_weight" value="70">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="profileGoalsLabel">Fitness Goals</label>
+        <select class="form-select" id="p_goal">
+          <option value="lose-weight"          data-t="profileGoalLoseWeight">Lose Weight</option>
+          <option value="build-muscle"         data-t="profileGoalBuildMuscle">Build Muscle</option>
+          <option value="improve-endurance"    data-t="profileGoalEndurance">Improve Endurance</option>
+          <option value="increase-flexibility" data-t="profileGoalFlexibility">Increase Flexibility</option>
+          <option value="general-fitness"      data-t="profileGoalGeneral">General Fitness</option>
+          <option value="athletic-performance" data-t="profileGoalAthletic">Athletic Performance</option>
+        </select>
+      </div>
+    </div>
+    <div class="wizard-nav">
+      <div class="nav-left"><button class="btn" onclick="goPrev()" data-t="btnBack">← Back</button></div>
+      <span class="step-counter" data-step="5"></span>
+      <div class="nav-right"><button class="btn btn-submit" onclick="submitForm()" data-t="btnSubmit">✓ Complete Setup</button></div>
+    </div>
+  </div>
+
+  <!-- ═══ FINAL SUCCESS ═══ -->
+  <div class="final-success card" id="finalSuccess">
+    <div class="success-icon">✓</div>
+    <h2 data-t="finalTitle">Setup Complete!</h2>
+    <p data-t="finalDesc">Your Smart Mirror is configured and ready. Your personalized fitness experience awaits.</p>
+    <button class="btn btn-submit" onclick="resetForm()" data-t="btnReset">Start Fresh ↺</button>
+  </div>
+
+</div>
+
+<!-- PHP form -->
+<form id="phpForm" method="POST" action="save-config.php" style="display:none;">
+  <input type="hidden" name="config_data" id="configDataInput">
+</form>
+
+<script src="js/script.js"></script>
+</body>
+</html>
