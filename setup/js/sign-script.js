@@ -561,7 +561,7 @@ async function submitForm() {
     document.getElementById('finalSuccess').classList.add('show');
 
     setTimeout(() => {
-      window.location.href = "/smart-mirror-dashboard/dashboard/index.html";
+      window.location.href = "dashboard/index.html";
     }, 1500);
 
   } catch (err) {

@@ -130,29 +130,38 @@ body::after {
   left: 38%;
 
 }
+/* Logout button layout */
 .log-out-btn{
   position: absolute;
   width: 70px;
   height: 30px;
-  right: 5%;
+  right: 108px;
   top: 7%;
   background-color:var(--red);
   color: #ffffff;
   font-weight: bolder;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  z-index: 100;
 }
+
+/* Moving profile button to the right edge */
 .profile-btn{
-   position: absolute;
-  width: 70px;
+  position: absolute;
+  width: 90px;
   height: 30px;
-  right: 15%;
+  right: 28px;
   top: 7%;
-  background-color:#059441;
-  color: #ffffff;
+  background-color:#3ae7e1;
+  color: black;
   font-weight: bolder;
   text-decoration: none;
   text-align: center;
   align-items: center;
   line-height: 30px;
+  border-radius: 20px;
+  z-index: 100;
 }
 @keyframes blink {
   0%, 80%, 100% { opacity: 1; }
@@ -721,3 +730,4 @@ font-weight: bolder;
   box-shadow: 0 0 36px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.14);
   animation: fadeInUp 0.7s 0.55s ease both;
 }
+

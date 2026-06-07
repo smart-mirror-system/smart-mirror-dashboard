@@ -1,3 +1,7 @@
+# This file is used to run a development environment for the smart mirror dashboard using Docker Compose.
+# It defines three services: MongoDB, the API server, and the AI service.
+# Each service is connected to a common network for communication.
+
 services:
   smart-mirror-mongo:
     image: mongo:7.0
@@ -8,7 +12,7 @@ services:
       - smart-mirror-net
 
   smart-mirror-api:
-    image: mohamedfouad71/smart-mirror-api:v1.1.0
+    image: mohamedfouad71/smart-mirror-api:e2f8e21599d5802f25dedf855727bfa91a70d87c
     ports:
       - '3000:3000'
     env_file:
@@ -19,7 +23,7 @@ services:
       - smart-mirror-net
 
   smart-mirror-ai:
-    image: mohamedfouad71/smart-mirror-ai:v1.0.0
+    image: mohamedfouad71/smart-mirror-ai:d6d1a6677945b781f78305941afffb414c07ba11
     env_file:
       - .env-ai
     depends_on:

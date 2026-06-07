@@ -1,0 +1,191 @@
+/* ─── CHATBOT HUD LAYOUT ─── */
+.chat-container {
+    position: absolute;
+    top: 80px;
+    left: 5%;
+    width: 90%;
+    height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    padding: 0;
+    overflow: hidden;
+    background: rgba(14, 20, 26, 0.6); /* Deep charcoal */
+}
+
+/* ─── SIDEBAR ─── */
+.chat-sidebar {
+    width: 250px;
+    background: rgba(0, 0, 0, 0.5);
+    border-right: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 15px;
+}
+
+.chat-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-list-item {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--white-dim);
+    padding: 12px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.chat-list-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.chat-list-item.active {
+    background: rgba(58, 231, 225, 0.1);
+    color: #3ae7e1;
+    border: 1px solid #3ae7e1;
+    box-shadow: 0 0 15px rgba(58, 231, 225, 0.3);
+}
+
+/* ─── MAIN CHAT AREA ─── */
+.chat-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 30px 20px 10px;
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.chat-header h2 {
+    font-family: 'Orbitron', monospace;
+    color: #3ae7e1;
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-right: 15px;
+}
+
+/* ─── MESSAGE BUBBLES ─── */
+.msg-bubble {
+    max-width: 75%;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    position: relative;
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+.msg-user {
+    align-self: flex-end;
+    background: rgba(58, 231, 225, 0.15);
+    color: #ffffff;
+    border-right: 4px solid #3ae7e1;
+    box-shadow: 0 0 20px rgba(58, 231, 225, 0.1);
+}
+
+.msg-bot {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    border-left: 4px solid #7ab8ff;
+}
+
+/* ─── INPUT AREA ─── */
+.chat-input-area {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+#chatInput {
+    flex-grow: 1;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    padding: 15px 20px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s;
+}
+
+#chatInput:focus {
+    border-color: #3ae7e1;
+    box-shadow: 0 0 15px rgba(58, 231, 225, 0.3);
+}
+
+/* ─── BUTTONS & UTILS ─── */
+.btn-cyan {
+    background: linear-gradient(135deg, #3ae7e1, #2193b0);
+    color: #000;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(58, 231, 225, 0.4);
+    transition: 0.3s;
+}
+
+.btn-cyan:disabled {
+    background: #555;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.btn-danger {
+    background: transparent;
+    color: #ff4d6a;
+    border: 1px solid #ff4d6a;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Share Tech Mono';
+}
+
+.back-btn {
+    color: #3ae7e1;
+    text-decoration: none;
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.typing-indicator {
+    align-self: flex-start;
+    color: #3ae7e1;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    margin-left: 15px;
+    animation: blink 1.5s infinite;
+}

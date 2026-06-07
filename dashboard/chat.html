@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Mirror — AI Coach</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/chat.css">
+</head>
+<body>
+    <div class="mirror-frame">
+        <div class="mirror-inner">
+            <div class="scanlines"></div>
+
+            <div class="status-bar">
+                <div class="sb-live">
+                    <a href="index.html" class="back-btn">◄ Back to Mirror</a>
+                </div>
+                <span class="sb-center">AI FITNESS COACH</span>
+                <span class="sb-time" id="clockVal">00:00:00</span>
+            </div>
+
+            <div class="chat-container panel wa">
+                <div class="chat-sidebar">
+                    <button id="btnNewChat" class="btn-cyan">+ New Session</button>
+                    <div class="chat-list" id="chatList">
+                        </div>
+                </div>
+
+                <div class="chat-main">
+                    <div class="chat-header">
+                        <h2 id="currentChatTitle">Select a session</h2>
+                        <button id="btnDeleteChat" class="btn-danger" style="display:none;">Delete</button>
+                    </div>
+
+                    <div class="chat-messages" id="chatMessages">
+                        </div>
+                    
+                    <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                        AI is analyzing<span>.</span><span>.</span><span>.</span>
+                    </div>
+
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInput" placeholder="Ask your AI coach about your form, diet, or routine..." disabled>
+                        <button id="btnSend" class="btn-cyan" disabled>SEND</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="js/env-config.js"></script>
+    <script src="js/chat.js"></script>
+</body>
+</html>
