@@ -149,16 +149,27 @@ function connectSocket() {
     if (formVal) formVal.textContent = String(score);
   });
 
-  socket.on("workout:start", (d) => {
+socket.on("workout:start", (d) => {
     console.log("workout:start", d);
     const summaryBox = document.getElementById("summaryBox");
     if (summaryBox) summaryBox.style.display = "none";
+    
+    // Hide the mouse cursor only inside the workout container (or the whole page) during the session
+    document.body.style.cursor = "none"; 
   });
 
   socket.on("workout:stop", (d) => {
     console.log("workout:stop", d);
+    
+    // 🚨 Mandatory safety: restore the normal mouse cursor immediately even if the browser overrides it
+    setTimeout(() => {
+        document.body.style.cursor = "default";
+        document.documentElement.style.cursor = "default";
+    }, 100); // 100ms delay to ensure the DOM is stable
+    
+    setAuthStatus("Workout Stopped ✅");
   });
-
+    
   socket.on("workout:summary", (s) => {
     console.log("workout:summary", s);
     const summaryBox = document.getElementById("summaryBox");
