@@ -126,8 +126,34 @@ body::after {
   background: var(--white);
   box-shadow: 0 0 14px rgba(255,255,255,0.95), 0 0 36px rgba(255,255,255,0.3);
   animation: blink 2s ease-in-out infinite;
-}
+  position: absolute;
+  left: 38%;
 
+}
+.log-out-btn{
+  position: absolute;
+  width: 70px;
+  height: 30px;
+  right: 5%;
+  top: 7%;
+  background-color:var(--red);
+  color: #ffffff;
+  font-weight: bolder;
+}
+.profile-btn{
+   position: absolute;
+  width: 70px;
+  height: 30px;
+  right: 15%;
+  top: 7%;
+  background-color:#059441;
+  color: #ffffff;
+  font-weight: bolder;
+  text-decoration: none;
+  text-align: center;
+  align-items: center;
+  line-height: 30px;
+}
 @keyframes blink {
   0%, 80%, 100% { opacity: 1; }
   40% { opacity: 0.12; }
@@ -141,6 +167,8 @@ body::after {
   color: var(--white);
   text-transform: uppercase;
   opacity: 0.88;
+  position: absolute;
+  left: 40%;
 }
 
 .sb-center {
@@ -157,6 +185,8 @@ body::after {
   font-size: 13px;
   color: var(--white-dim);
   letter-spacing: 2px;
+  position: absolute;
+  left: 0;
 }
 
 /* ─── PANEL TITLE ─── */
@@ -248,7 +278,8 @@ body::after {
 
 /* ─── AVATAR PANEL — top right ─── */
 .panel-avatar {
-  top: 72px; right: 28px;
+  position: absolute;
+  top: 102px; right: 28px;
   width: 140px;
   padding: 16px;
   text-align: center;
@@ -277,26 +308,7 @@ body::after {
 }
 
 /* ─── EXERCISE TAG — center ─── */
-.exercise-tag {
-  position: absolute;
-  top: 30%;
-  left: 45%;
-  transform: translate(-50%, -310px);
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.42);
-  border-radius: 30px;
-  padding: 7px 26px;
-  font-family: 'Orbitron', monospace;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 3.5px;
-  color: var(--white);
-  text-transform: uppercase;
-  white-space: nowrap;
-  box-shadow: 0 0 36px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.14);
-  animation: fadeInUp 0.7s 0.55s ease both;
-  z-index: 5;
-}
+
 
 /* ─── REPS PANEL — mid left ─── */
 .panel-reps {
@@ -650,4 +662,62 @@ body::after {
 }
 .user-name h2{
   color: white;
+}
+.control{
+  
+  width: 80px;
+  height: 50px;
+   display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.exercises-menu {
+    width: 320px;        
+    height: 65px;        
+    font-size: 38px;     
+    padding: 8px 12px;
+    border-radius: 10px;
+    position: absolute;
+right: 40%;
+background-color: #000;
+color: #ffffff;
+font-weight: bolder;
+}
+
+
+.exercises-menu option {
+    font-size: 18px;
+    padding: 10px;
+    font-size: 38px;     
+    font-weight: bolder;
+}
+
+.exercise-controls {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+
+    z-index: 5;
+}
+.exercise-tag {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.42);
+  border-radius: 30px;
+  padding: 7px 26px;
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3.5px;
+  color: var(--white);
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 0 36px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.14);
+  animation: fadeInUp 0.7s 0.55s ease both;
 }

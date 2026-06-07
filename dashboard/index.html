@@ -33,31 +33,34 @@
 
             <!-- ===== Auth ===== -->
             <div id="authBox">
-            <input id="email" type="email" placeholder="email" />
-            <input id="password" type="password" placeholder="password" />
-            <button id="btnLogin">Login</button>
-            <button id="btnLogout" style="display:none;">Logout</button>
+           
+            
+            <button class="log-out-btn" id="btnLogout" style="display:none;">Logout</button>
+            <a href="/smart-mirror-dashboard/setup/profile.html" class="profile-btn" id="">My Profile</a>
             <div id="authStatus"></div>
             </div>
 
-            <!-- ===== Workout controls ===== -->
-            <div id="controls" style="margin-top:10px; display:none;">
-            <select id="exerciseSelect">
+            
+
+            <!-- Optional summary UI -->
+            <pre id="summaryBox" style="display:none; white-space:pre-wrap;"></pre>
+
+            <!-- Exercise Tag -->
+             <!-- ===== Workout controls ===== -->
+            <div  class="control" id="controls" style="margin-top:10px; display:none;">
+            <select  class ="exercises-menu" id="exerciseSelect">
                 <option value="pushup">Pushup</option>
                 <option value="squat">Squat</option>
                 <option value="bicep_curl">Bicep Curl</option>
                 <option value="situp">Situp</option>
             </select>
 
-            <button id="btnStart">Start</button>
-            <button id="btnStop">Stop</button>
+            <div class="exercise-controls">
+    <button class="exercise-tag" id="btnStart">▶ Start</button>
+    <button class="exercise-tag" id="btnStop">Stop</button>
+</div>
             </div>
-
-            <!-- Optional summary UI -->
-            <pre id="summaryBox" style="display:none; white-space:pre-wrap;"></pre>
-
-            <!-- Exercise Tag -->
-            <div class="exercise-tag" id="exerciseTag">▶ Start</div>
+            
             <div class="user-name">
                 <h2>Hi</h2>
                 <h1>Mohamed Tawfik</h1>
@@ -145,7 +148,9 @@
             </div>
 
             <!-- AVATAR — top right -->
+            
             <div class="panel panel-avatar wa">
+                 <Br></Br>
                 <svg class="avatar-svg" viewBox="0 0 80 110">
                     <defs>
                         <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
