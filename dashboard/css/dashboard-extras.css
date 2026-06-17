@@ -1,0 +1,485 @@
+/* ════════════════════════════════════════
+   DASHBOARD EXTRAS v5
+   Full CSS Grid layout — zero overlaps at any zoom
+   Structure:
+   ════════════════════════════════════════ */
+
+/* ── Reset old absolute layout ── */
+.mirror-frame {
+  position: fixed !important;
+  top: 60px !important;
+  left: 0; right: 0; bottom: 0;
+  height: calc(100vh - 60px) !important;
+  overflow: hidden;
+}
+
+/* ── Override ALL old absolute panel positions ── */
+.panel-health, .panel-avatar, .panel-reps,
+.panel-feedback, .panel-goal, .panel-duration, .panel-cals {
+  position: static !important;
+  top: auto !important; bottom: auto !important;
+  left: auto !important; right: auto !important;
+  transform: none !important;
+  width: 100% !important;
+}
+
+/* ════════════════════════════════════════
+   GRID WRAPPER — replaces mirror-inner layout
+   ════════════════════════════════════════ */
+.mirror-inner {
+    display: grid;
+    grid-template-columns: 300px 1fr 300px; /* عمودين جانبيين ومساحة في النص للـ Skeleton */
+    grid-template-rows: repeat(4, auto);
+    gap: 20px;
+    padding: 20px;
+    height: 100%;
+}
+
+/* 2. إلغاء أي تنسيقات فردية كانت تبوظ التوزيع */
+#timerPanel{
+position: static !important;
+    width: 100% !important;
+    height: 140px !important; /* ارتفاع ثابت للكل */
+}
+  
+
+/* ─── Scanlines + canvas stay fullscreen ─── */
+.scanlines {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 20 !important;
+  pointer-events: none !important;
+}
+#skeletonCanvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+}
+.skeleton-overlay {
+  position: absolute !important;
+  bottom: 60px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: clamp(80px, 9vw, 130px) !important;
+  z-index: 3 !important;
+}
+
+/* ─── Workout bar stays centered top ─── */
+.workout-bar {
+  position: absolute !important;
+  top: 12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 30 !important;
+  width: auto !important;
+  /* Remove from grid */
+  grid-column: unset !important;
+}
+
+/* ─── Summary box ─── */
+#summaryBox {
+  position: absolute !important;
+  bottom: 70px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 60 !important;
+  width: auto !important;
+  min-width: 260px !important;
+  max-width: 340px !important;
+  background: rgba(4,8,14,0.94) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 14px !important;
+  padding: 16px 22px !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 20px !important;
+  color: rgba(255,255,255,0.78) !important;
+  backdrop-filter: blur(20px) !important;
+  line-height: 2 !important;
+  white-space: pre-wrap !important;
+}
+
+/* ════════════════════════════════════════
+   GRID AREAS
+   ════════════════════════════════════════ */
+
+/* ── LEFT COLUMN ── */
+#healthPanel {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  margin-top: 12px; /* below workout bar */
+}
+
+#repsPanel {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+}
+
+/* Stack health + reps in left column using flex */
+.mirror-inner > #healthPanel,
+.mirror-inner > #repsPanel {
+  /* these are naturally stacked inside col 1 row 1 via auto-rows */
+}
+
+/* Left column wrapper trick: use a subgrid-like approach */
+/* We'll wrap left panels in a flex column via CSS */
+#healthPanel { order: 1; }
+#repsPanel   { order: 2; }
+
+/* ── CENTER ── (skeleton + greeting live here, just empty grid cell) ── */
+
+/* ── BOTTOM ROW ── */
+/* Form feedback + calories side by side */
+.panel-feedback {
+  grid-column: 1;
+  grid-row: 2;
+  width: 100% !important;
+}
+
+ 
+/* ── Hidden stuff ── */
+#authBox { display: none !important; }
+.user-greeting { display: none !important; }
+
+/* ════════════════════════════════════════
+   COLUMN LAYOUT — left panels stacked
+   We need left column to stack health on top, reps below
+   We achieve this with a grid sub-layout on col 1
+   ════════════════════════════════════════ */
+
+/* Override: left column uses its own grid */
+#healthPanel,
+#repsPanel,
+.panel-feedback,
+#timerPanel {
+  grid-column: 1 !important;
+}
+
+/* Assign explicit rows */
+#healthPanel    { grid-row: 1 !important; align-self: start !important; }
+#repsPanel      { grid-row: 2 !important; align-self: center !important; }
+#timerPanel     { grid-row: 4 !important; align-self: end !important; }
+.panel-feedback { grid-row: 3 !important; align-self: end !important; }
+
+/* Center column — empty visual space */
+/* (skeleton SVG is absolute positioned over it) */
+
+/* Right column */
+#videoPanel { grid-column: 3; grid-row: 1; }
+#musclePanel { grid-column: 3; grid-row: 2; }
+#goalPanel  { grid-column: 3; grid-row: 3; }
+#calsPanel  { grid-column: 3; grid-row: 4; }
+
+/* ════════════════════════════════════════
+   PANEL INTERNAL STYLES
+   ════════════════════════════════════════ */
+
+/* ── Workout bar ── */
+.workout-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(5,9,16,0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 40px;
+  padding: 6px 8px 6px 16px;
+  white-space: nowrap;
+}
+.ex-select-container { position: relative; display: flex; align-items: center; }
+.ex-select {
+  background: rgba(58,231,225,0.07);
+  border: 1px solid rgba(58,231,225,0.22);
+  color: #fff;
+  padding: 7px 28px 7px 14px;
+  border-radius: 20px;
+  font-family: 'Orbitron', monospace;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  cursor: pointer; outline: none;
+  -webkit-appearance: none; appearance: none;
+  transition: all 0.3s;
+}
+.ex-select:hover { background: rgba(58,231,225,0.13); border-color: rgba(58,231,225,0.45); }
+.ex-select option { background: #080e18; color: #fff; }
+.ex-select-arrow { position: absolute; right: 10px; pointer-events: none; color: #3ae7e1; font-size: 7px; }
+.ex-toggle-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, rgba(58,231,225,0.13), rgba(107,163,255,0.13));
+  border: 1px solid rgba(58,231,225,0.4); border-radius: 30px;
+  font-family: 'Orbitron', monospace;
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  color: #3ae7e1; cursor: pointer; text-transform: uppercase; transition: all 0.3s;
+}
+.ex-toggle-btn:hover { background: linear-gradient(135deg, rgba(58,231,225,0.22), rgba(107,163,255,0.22)); box-shadow: 0 0 18px rgba(58,231,225,0.2); }
+.ex-toggle-btn.running { background: linear-gradient(135deg, rgba(255,77,106,0.15), rgba(255,110,70,0.15)); border-color: rgba(255,77,106,0.45); color: #ff4d6a; }
+.ex-toggle-icon { font-size: 11px; }
+
+/* ── Right panel: demo + muscles ── */
+#videoPanel {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+  padding: 14px 15px !important;
+}
+
+/* ════════════════════════════════════════
+   MULTI-VIEW DEMO NAVIGATION BUTTONS
+   ════════════════════════════════════════ */
+.ex-demo-container {
+    position: relative;
+    width: 100%;
+}
+
+.demo-nav-btn {
+    display: block; /* بتظهر علطول ومتاحة للمستخدم */
+    position: absolute;
+    top: 40%; /* متناسبة مع الـ padding-top: 80% بتاع البوكس */
+    transform: translateY(-50%);
+    z-index: 20; /* أعلى من الميديا عشان تظهر فوق الـ GIF والفيديو */
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.demo-nav-btn:hover {
+    background: rgba(58, 231, 225, 0.3);
+    border-color: rgba(58, 231, 225, 0.6);
+    color: #3ae7e1;
+    box-shadow: 0 0 8px rgba(58, 231, 225, 0.4);
+}
+
+.demo-nav-btn.prev {
+    left: 15px;
+}
+
+.demo-nav-btn.next {
+    right: 15px;
+}
+
+/* Exercise animation — taller */
+.ex-demo-wrap {
+  position: relative;
+  width: 100%;
+  padding-top: 80%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.07);
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.ex-demo-placeholder {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 7px;
+  color: rgba(255,255,255,0.25);
+  font-family: 'Orbitron', monospace; font-size: 8px;
+  letter-spacing: 1px; text-align: center;
+}
+
+.ex-demo-svg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.ex-demo-svg svg { width: 100%; height: 100%; }
+
+.ex-demo-wrap img, .ex-demo-wrap video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; border-radius: 10px;
+}
+
+/* Muscle map — bigger */
+.muscle-map-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 30px;
+}
+.muscle-map-wrap > div:first-child { flex-shrink: 0; }
+.muscle-map-wrap svg { width: 72px !important; height: auto !important; display: block; }
+.muscle-legend { flex: 1; display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
+.muscle-legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.65); white-space: nowrap;
+}
+.muscle-legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.muscle-legend-dot.primary   { background: #ff4d6a; box-shadow: 0 0 6px rgba(255,77,106,0.8); }
+.muscle-legend-dot.secondary { background: #ffd250; box-shadow: 0 0 6px rgba(255,210,80,0.6); }
+
+/* ── Feedback icon states ── */
+#feedbackIcon.good { border-color: rgba(95,255,195,0.6); background: rgba(95,255,195,0.08); }
+#feedbackIcon.bad  { border-color: rgba(255,77,106,0.6); background: rgba(255,77,106,0.08); }
+
+/* ── Calories compact ── */
+.cals-value { font-size: clamp(26px, 2.8vw, 38px) !important; }
+
+/* ── Daily Goal compact ── */
+/* Daily Goal */
+.panel-goal {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+/* Circle */
+.panel-goal .ring-container {
+    width: 58px !important;
+    height: 58px !important;
+    flex-shrink: 0;
+}
+
+/* Text area */
+.panel-goal .goal-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.panel-goal .ring-pct {
+    font-size: 12px !important;
+}
+
+.panel-goal .ring-sub {
+    font-size: 7px !important;
+}
+
+.panel-goal .goal-title {
+    font-size: 10px !important;
+    margin-bottom: 4px !important;
+    line-height: 1.1;
+}
+
+.panel-goal .goal-stat {
+    font-size: 12px !important;
+    margin-bottom: 2px !important;
+    line-height: 1.2;
+}
+/* ── Username in navbar ── */
+.sm-navbar-username {
+  font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; color: rgba(255,255,255,0.72); white-space: nowrap;
+  padding: 3px 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+}
+
+/* ════════════════════════════════════════
+   32" SCREEN (1600px+)
+   ════════════════════════════════════════ */
+@media (min-width: 1600px) {
+  .mirror-inner {
+    grid-template-columns: clamp(260px, 22vw, 330px) 1fr clamp(255px, 22vw, 320px) !important;
+    gap: 16px !important;
+    padding: 14px !important;
+  }
+  .muscle-map-wrap svg { width: 88px !important; }
+  .muscle-legend-item  { font-size: 13px !important; }
+  .reps-number { font-size: clamp(80px, 7vw, 104px) !important; }
+  .vital-value { font-size: clamp(32px, 3vw, 46px) !important; }
+  .ex-toggle-btn { font-size: 12px !important; padding: 10px 24px !important; }
+  .ex-select     { font-size: 12px !important; }
+  .skeleton-overlay { width: clamp(120px, 11vw, 165px) !important; }
+}
+
+/* ════════════════════════════════════════
+   TABLET 900–1280px
+   ════════════════════════════════════════ */
+@media (max-width: 1280px) {
+  .mirror-inner {
+    grid-template-columns: clamp(195px, 22vw, 255px) 1fr clamp(195px, 22vw, 245px) !important;
+    gap: 10px !important;
+  }
+  .reps-number { font-size: clamp(58px, 6.5vw, 86px) !important; }
+}
+
+@media (max-width: 1024px) {
+  .mirror-inner {
+    grid-template-columns: clamp(175px, 24vw, 225px) 1fr clamp(175px, 24vw, 220px) !important;
+    gap: 8px !important; padding: 10px !important;
+  }
+  .workout-bar { top: 10px !important; }
+  #healthPanel { margin-top: 46px !important; }
+  #videoPanel  { margin-top: 46px !important; }
+  .reps-number { font-size: clamp(50px, 6vw, 76px) !important; }
+}
+
+/* ════════════════════════════════════════
+   SMALL TABLET / LANDSCAPE 768px
+   Collapse to 2 columns, hide right panel
+   ════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .mirror-inner {
+    grid-template-columns: clamp(155px, 38vw, 210px) 1fr !important;
+    grid-template-rows: auto auto auto auto !important;
+    gap: 8px !important; padding: 8px !important;
+  }
+
+  /* Right panel hidden */
+  #videoPanel { display: none !important; }
+
+  /* Rearrange */
+  #healthPanel    { grid-column: 1 !important; grid-row: 1 !important; margin-top: 42px !important; }
+  #repsPanel      { grid-column: 1 !important; grid-row: 2 !important; }
+  #calsPanel      { grid-column: 2 !important; grid-row: 2 !important; align-self: start !important; }
+  #timerPanel     { grid-column: 1 !important; grid-row: 3 !important; }
+  #goalPanel      { grid-column: 2 !important; grid-row: 3 !important; align-self: center !important; }
+  .panel-feedback { grid-column: 2 !important; grid-row: 1 !important; align-self: start !important; margin-top: 42px !important; }
+
+  .reps-number { font-size: clamp(48px, 9vw, 72px) !important; }
+  .skeleton-overlay { width: clamp(58px, 9vw, 88px) !important; }
+  .workout-bar { max-width: calc(100vw - 20px) !important; }
+}
+
+/* ════════════════════════════════════════
+   MOBILE PORTRAIT 480px
+   Single column
+   ════════════════════════════════════════ */
+@media (max-width: 540px) {
+  .mirror-inner {
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto auto auto !important;
+    gap: 6px !important; padding: 6px !important;
+  }
+
+  #videoPanel  { display: none !important; }
+  #goalPanel   { display: none !important; }
+
+  #healthPanel    { grid-column: 1 !important; grid-row: 1 !important; margin-top: 38px !important; }
+  #repsPanel      { grid-column: 1 !important; grid-row: 2 !important; }
+  .panel-feedback { grid-column: 2 !important; grid-row: 1 !important; }
+  #calsPanel      { grid-column: 2 !important; grid-row: 2 !important; align-self: start !important; }
+  #timerPanel     { grid-column: 1 / 3 !important; grid-row: 3 !important; text-align: center !important; }
+
+  .vital-value { font-size: clamp(18px, 5vw, 26px) !important; }
+  .reps-number { font-size: clamp(38px, 10vw, 52px) !important; letter-spacing: -2px !important; }
+  .ring-pct    { font-size: 11px !important; }
+  .panel-goal .ring-container { width: 44px !important; height: 44px !important; }
+
+  .skeleton-overlay { width: 48px !important; }
+  .workout-bar { top: 7px !important; max-width: calc(100vw - 12px) !important; }
+  #healthPanel { margin-top: 38px !important; }
+
+  #summaryBox {
+    left: 6px !important; right: 6px !important;
+    transform: none !important; min-width: unset !important;
+    font-size: 11px !important;
+  }
+}
