@@ -1,259 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Mirror — Fitness HUD</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&family=Share+Tech+Mono&display=swap"
-        rel="stylesheet">
-    <link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
-    <link rel="stylesheet" href="css/style.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Smart Mirror — Fitness HUD</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&family=Share+Tech+Mono&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/navbar.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard-extras.css">
 </head>
-
 <body>
 
-    <div class="mirror-frame">
-        <div class="mirror-inner">
+<nav class="sm-navbar" data-context="dashboard" data-setup-root="../setup/"></nav>
 
-            <div class="scanlines"></div>
+<div class="mirror-frame">
+  <div class="mirror-inner">
 
+    <!-- ── Always fullscreen overlays (absolute, outside grid flow) ── -->
+    <div class="scanlines"></div>
+    <canvas id="skeletonCanvas"></canvas>
 
-            <!-- Status Bar -->
-            <div class="status-bar">
-                <div class="sb-live">
-                    <div class="status-dot"></div>
-                    <span class="sb-label">Live Tracking</span>
-                </div>
-                <span class="sb-center">Smart Mirror Training · Set 3 / 5</span>
-                <span class="sb-time" id="clockVal">10:42:31</span>
-            </div>
-
-            <!-- ===== Auth ===== -->
-            <div id="authBox">
-                <button class="log-out-btn" id="btnLogout" style="display:none;">Logout</button>
-                <a href="/smart-mirror-dashboard/setup/profile.html" class="profile-btn">My Profile</a>
-                <a href="chat.html" class="profile-btn" style="right: 208px; background-color: #3ae7e1; color: #000;">AI Coach</a>
-                
-                <div id="authStatus"></div>
-            </div>
-
-            
-
-            <!-- Optional summary UI -->
-            <pre id="summaryBox" style="display:none; white-space:pre-wrap;"></pre>
-
-            <!-- Exercise Tag -->
-             <!-- ===== Workout controls ===== -->
-            <div  class="control" id="controls" style="margin-top:10px; display:none;">
-            <select  class ="exercises-menu" id="exerciseSelect">
-                <option value="pushup">Pushup</option>
-                <option value="squat">Squat</option>
-                <option value="bicep_curl">Bicep Curl</option>
-                <option value="situp">Situp</option>
-            </select>
-
-            <div class="exercise-controls">
-    <button class="exercise-tag" id="btnStart">▶ Start</button>
-    <button class="exercise-tag" id="btnStop">Stop</button>
-</div>
-            </div>
-            
-            <div class="user-name">
-                <h2>Hi</h2>
-                <h1>Mohamed Tawfik</h1>
-            </div>
-            <!-- Skeleton Tracking -->
-            <div class="skeleton-overlay">
-                <svg class="skel-svg" viewBox="0 0 140 420" preserveAspectRatio="xMidYMax meet">
-                    <!-- Spine -->
-                    <line class="skel-line" x1="70" y1="48" x2="70" y2="132" />
-                    <!-- L arm -->
-                    <line class="skel-line" x1="70" y1="62" x2="26" y2="108" />
-                    <!-- R arm -->
-                    <line class="skel-line" x1="70" y1="62" x2="114" y2="108" />
-                    <!-- L thigh -->
-                    <line class="skel-line" x1="70" y1="132" x2="50" y2="228" />
-                    <!-- R thigh -->
-                    <line class="skel-line" x1="70" y1="132" x2="90" y2="228" />
-                    <!-- L shin -->
-                    <line class="skel-line" x1="50" y1="228" x2="42" y2="340" />
-                    <!-- R shin -->
-                    <line class="skel-line" x1="90" y1="228" x2="98" y2="340" />
-
-                    <!-- Head -->
-                    <circle class="skel-dot" cx="70" cy="30" r="6" />
-                    <!-- Neck -->
-                    <circle class="skel-dot" cx="70" cy="52" r="4" />
-                    <!-- L Elbow -->
-                    <circle class="skel-dot" cx="26" cy="108" r="4" />
-                    <!-- R Elbow -->
-                    <circle class="skel-dot" cx="114" cy="108" r="4" />
-                    <!-- Hip -->
-                    <circle class="skel-dot" cx="70" cy="132" r="5.5" />
-                    <!-- L Knee -->
-                    <circle class="skel-dot" cx="50" cy="228" r="5" />
-                    <!-- R Knee -->
-                    <circle class="skel-dot" cx="90" cy="228" r="5" />
-                    <!-- L Ankle -->
-                    <circle class="skel-dot" cx="42" cy="340" r="4" />
-                    <!-- R Ankle -->
-                    <circle class="skel-dot" cx="98" cy="340" r="4" />
-                </svg>
-            </div>
-
-            <!-- HEALTH DASHBOARD — top left -->
-            <div class="panel panel-health wa">
-                <div class="panel-title">Personalized Health Dashboard</div>
-                <div class="vitals-row">
-                    <div class="vital-item">
-                        <div class="vital-value red-val" id="bpmVal">85</div>
-                        <div class="vital-label">Heart Rate</div>
-                    </div>
-                    <div class="vital-unit">bpm</div>
-                    <div class="v-sep"></div>
-                    <div class="vital-item">
-                        <div class="vital-value">99</div>
-                        <div class="vital-label">SpO₂</div>
-                    </div>
-                    <div class="vital-unit">%</div>
-                </div>
-                <div class="chart-label">Heart Rate · BPM</div>
-                <div class="sparkline">
-                    <svg viewBox="0 0 220 52" preserveAspectRatio="none">
-                        <defs>
-                            <linearGradient id="hrGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="rgba(255,255,255,0.22)" />
-                                <stop offset="100%" stop-color="rgba(255,255,255,0)" />
-                            </linearGradient>
-                        </defs>
-                        <path
-                            d="M0,42 L16,36 L32,32 L48,22 L62,28 L78,14 L92,22 L106,16 L122,8 L136,18 L150,14 L164,22 L178,12 L192,20 L206,26 L220,22"
-                            fill="none" stroke="rgba(255,255,255,0.72)" stroke-width="1.8" class="hr-line" />
-                        <path
-                            d="M0,42 L16,36 L32,32 L48,22 L62,28 L78,14 L92,22 L106,16 L122,8 L136,18 L150,14 L164,22 L178,12 L192,20 L206,26 L220,22 L220,52 L0,52 Z"
-                            fill="url(#hrGrad)" opacity="0.55" />
-                        <circle cx="220" cy="22" r="3.5" fill="white" opacity="0.9">
-                            <animate attributeName="r" values="2;5;2" dur="1.6s" repeatCount="indefinite" />
-                            <animate attributeName="opacity" values="0.9;0.25;0.9" dur="1.6s"
-                                repeatCount="indefinite" />
-                        </circle>
-                    </svg>
-                </div>
-                <div class="chart-axis">
-                    <span>0s</span><span>30s</span><span>60s</span>
-                </div>
-            </div>
-
-            <!-- AVATAR — top right -->
-            
-            <div class="panel panel-avatar wa">
-                 <Br></Br>
-                <svg class="avatar-svg" viewBox="0 0 80 110">
-                    <defs>
-                        <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="rgba(255,255,255,0.92)" />
-                            <stop offset="100%" stop-color="rgba(180,210,255,0.78)" />
-                        </linearGradient>
-                        <filter id="ag-glow">
-                            <feGaussianBlur stdDeviation="2.5" result="b" />
-                            <feMerge>
-                                <feMergeNode in="b" />
-                                <feMergeNode in="SourceGraphic" />
-                            </feMerge>
-                        </filter>
-                    </defs>
-                    <g filter="url(#ag-glow)">
-                        <circle cx="40" cy="18" r="13" fill="url(#ag)" opacity="0.95" />
-                        <ellipse cx="40" cy="10" rx="11" ry="6" fill="rgba(155,185,220,0.7)" />
-                        <rect x="24" y="33" width="32" height="36" rx="8" fill="rgba(255,255,255,0.82)" />
-                        <line x1="24" y1="39" x2="5" y2="22" stroke="url(#ag)" stroke-width="8"
-                            stroke-linecap="round" />
-                        <line x1="56" y1="39" x2="75" y2="22" stroke="url(#ag)" stroke-width="8"
-                            stroke-linecap="round" />
-                        <circle cx="5" cy="20" r="5" fill="url(#ag)" />
-                        <circle cx="75" cy="20" r="5" fill="url(#ag)" />
-                        <line x1="34" y1="69" x2="29" y2="104" stroke="rgba(140,170,215,0.88)" stroke-width="10"
-                            stroke-linecap="round" />
-                        <line x1="46" y1="69" x2="51" y2="104" stroke="rgba(140,170,215,0.88)" stroke-width="10"
-                            stroke-linecap="round" />
-                    </g>
-                </svg>
-                <div class="avatar-label">Cycle AI</div>
-            </div>
-
-            <!-- REPS — mid left -->
-            <div class="panel panel-reps wa">
-                <div class="panel-title">Current Set</div>
-                <div class="reps-display">
-                    <span class="reps-label-text">Count:</span>
-                    <span class="reps-number" id="repCount">12</span>
-                </div>
-                <div class="set-info">
-                    <div class="set-item"><span class="set-val">3/5</span><span class="set-lbl">Sets</span></div>
-                    <div class="set-item"><span class="set-val">50</span><span class="set-lbl">Target</span></div>
-                    <div class="set-item"><span class="set-val">1:20</span><span class="set-lbl">Rest</span></div>
-                </div>
-            </div>
-
-            <!-- FEEDBACK — mid right -->
-            <div class="panel panel-feedback wa">
-                <div class="feedback-icon">
-                    <svg viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <div class="feedback-text">
-                    <strong id="formStatus">Form OK</strong>
-                    <span id="formTip">Keep back straight. Lower to 90° for best results. Target 50 reps total.</span>
-                </div>
-            </div>
-
-            <!-- GOAL RING — bottom left -->
-            <div class="panel panel-goal wa">
-                <div class="ring-container">
-                    <svg class="ring-svg" viewBox="0 0 78 78">
-                        <circle class="ring-track" cx="39" cy="39" r="34" />
-                        <circle class="ring-fill" cx="39" cy="39" r="34" />
-                    </svg>
-                    <div class="ring-center">
-                        <span class="ring-pct">60%</span>
-                        <span class="ring-sub">done</span>
-                    </div>
-                </div>
-                <div class="goal-info">
-                    <div class="goal-title">Daily Goal</div>
-                    <div class="goal-stat"><span>18</span> / 30 min</div>
-                    <div class="goal-stat"><span>6</span> exercises</div>
-                </div>
-            </div>
-
-            <!-- DURATION — bottom center -->
-            <div class="panel panel-duration wa">
-                <div class="dur-label">Workout Time</div>
-                <div class="dur-value" id="timerVal">24:33</div>
-            </div>
-
-            <!-- CALORIES — bottom right -->
-            <div class="panel panel-cals wa">
-                <div class="panel-title">Calories Burned</div>
-                <div class="cals-row">
-                    <div class="cals-value">214</div>
-                    <div class="cals-unit">kcal</div>
-                </div>
-                <div class="cals-bar">
-                    <div class="cals-bar-fill"></div>
-                </div>
-            </div>
-
-        </div>
+    <!-- Static skeleton SVG (decorative) -->
+    <div class="skeleton-overlay" id="skeletonPanel">
+      <svg class="skel-svg" viewBox="0 0 140 420" preserveAspectRatio="xMidYMax meet">
+        <line class="skel-line" x1="70" y1="48" x2="70" y2="132"/>
+        <line class="skel-line" x1="70" y1="62" x2="26" y2="108"/>
+        <line class="skel-line" x1="70" y1="62" x2="114" y2="108"/>
+        <line class="skel-line" x1="70" y1="132" x2="50" y2="228"/>
+        <line class="skel-line" x1="70" y1="132" x2="90" y2="228"/>
+        <line class="skel-line" x1="50" y1="228" x2="42" y2="340"/>
+        <line class="skel-line" x1="90" y1="228" x2="98" y2="340"/>
+        <circle class="skel-dot" cx="70" cy="30" r="6"/>
+        <circle class="skel-dot" cx="70" cy="52" r="4"/>
+        <circle class="skel-dot" cx="26" cy="108" r="4"/>
+        <circle class="skel-dot" cx="114" cy="108" r="4"/>
+        <circle class="skel-dot" cx="70" cy="132" r="5.5"/>
+        <circle class="skel-dot" cx="50" cy="228" r="5"/>
+        <circle class="skel-dot" cx="90" cy="228" r="5"/>
+        <circle class="skel-dot" cx="42" cy="340" r="4"/>
+        <circle class="skel-dot" cx="98" cy="340" r="4"/>
+      </svg>
     </div>
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script src="js/env-config.js"></script>
-    <script src="js/app.js"></script>
-</body>
 
+    <!-- Workout bar — centered top (absolute, outside grid) -->
+    <div class="workout-bar" id="workoutBar" style="display:none;">
+      <div class="ex-select-container">
+        <select class="ex-select" id="exerciseSelect" onchange="onExerciseChange(this.value)">
+            <option value="greeting" selected>Choose your workout 💪</option>
+            <option value="bicep_curl">Bicep Curl</option>
+            <option value="squat">Squat</option>
+            <option value="pushup">Push-up</option>
+            <option value="situp">Sit-up</option>
+            <option value="lateral_raise">Lateral Raise</option>
+            <option value="overhead_press">Overhead Press</option>
+            <option value="leg_raise">Leg Raise</option>
+            <option value="knee_raise">Knee Raise</option>
+            <option value="knee_press">Knee Press</option>
+            <option value="crunch">Crunch</option>
+          </select>
+        <div class="ex-select-arrow">▼</div>
+      </div>
+      <button class="ex-toggle-btn" id="btnStartStop" onclick="toggleWorkout()">
+        <span class="ex-toggle-icon" id="toggleIcon">▶</span>
+        <span id="toggleLabel">Start</span>
+      </button>
+    </div>
+
+    <!-- Summary (absolute, outside grid) -->
+    <pre id="summaryBox" style="display:none;"></pre>
+    <div id="authBox" style="display:none;"><div id="authStatus"></div></div>
+
+    <!-- ══════════════════════════════════════
+         GRID CELLS — order matches grid layout
+         Col1: health, reps, feedback, timer
+         Col2: (empty center — skeleton lives here)
+         Col3: videoPanel (spans rows 1-3), cals
+         Bottom: goal
+         ══════════════════════════════════════ -->
+
+    <!-- COL 1 ROW 1 — Heart Rate -->
+    <div class="panel panel-health" id="healthPanel">
+      <div class="panel-title">Heart Rate</div>
+      <div class="vitals-row">
+        <div class="vital-item">
+          <div class="vital-value red-val" id="bpmVal">85</div>
+          <div class="vital-label">BPM</div>
+        </div>
+        <div class="vital-unit">bpm</div>
+        <div class="v-sep"></div>
+        <div class="vital-item">
+          <div class="vital-value">99</div>
+          <div class="vital-label">SpO₂</div>
+        </div>
+        <div class="vital-unit">%</div>
+      </div>
+      <div class="chart-label">Live · BPM</div>
+      <div class="sparkline">
+        <svg viewBox="0 0 220 52" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="hrGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="rgba(255,77,106,0.3)"/>
+              <stop offset="100%" stop-color="rgba(255,77,106,0)"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,42 L16,36 L32,32 L48,22 L62,28 L78,14 L92,22 L106,16 L122,8 L136,18 L150,14 L164,22 L178,12 L192,20 L206,26 L220,22"
+                fill="none" stroke="rgba(255,77,106,0.8)" stroke-width="1.8" class="hr-line"/>
+          <path d="M0,42 L16,36 L32,32 L48,22 L62,28 L78,14 L92,22 L106,16 L122,8 L136,18 L150,14 L164,22 L178,12 L192,20 L206,26 L220,22 L220,52 L0,52 Z"
+                fill="url(#hrGrad)" opacity="0.6"/>
+          <circle cx="220" cy="22" r="3.5" fill="#ff4d6a" opacity="0.9">
+            <animate attributeName="r" values="2;5;2" dur="1.6s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.9;0.2;0.9" dur="1.6s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </div>
+      <div class="chart-axis"><span>0s</span><span>30s</span><span>60s</span></div>
+    </div>
+
+    <!-- COL 1 ROW 2 — Reps -->
+    <div class="panel panel-reps" id="repsPanel">
+      <div class="panel-title">Current Set</div>
+      <div class="reps-display">
+        <span class="reps-label-text">Reps</span>
+        <span class="reps-number" id="repCount">0</span>
+      </div>
+      <div class="set-info">
+        <div class="set-item"><span class="set-val">3/5</span><span class="set-lbl">Sets</span></div>
+        <div class="set-item"><span class="set-val">50</span><span class="set-lbl">Target</span></div>
+        <div class="set-item"><span class="set-val" id="restTimer">1:20</span><span class="set-lbl">Rest</span></div>
+      </div>
+    </div>
+
+    <!-- COL 1 ROW 3 — Form Feedback -->
+    <div class="panel panel-feedback">
+      <div class="feedback-icon" id="feedbackIcon">
+        <svg viewBox="0 0 12 12" fill="none">
+          <path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="feedback-text">
+        <strong id="formStatus">Ready</strong>
+        <span id="formTip">Select an exercise and press Start.</span>
+      </div>
+    </div>
+
+    
+      <!-- COL 1 ROW 4 — Workout Timer -->
+      <div class="panel panel-duration" id="timerPanel">
+        <div class="dur-label">Workout Time</div>
+        <div class="dur-value" id="timerVal">00:00</div>
+      </div>
+
+    <!-- COL 3 ROWS 1-3 — Exercise Demo -->
+    <div class="panel panel-right-top" id="videoPanel">
+      <div class="panel-title">Exercise Demo</div>
+
+      <!--
+        ══ ADD YOUR GIF / VIDEO ══════════════════════
+        1. Save to: dashboard/assets/pushup.gif
+        2. In exercise-demo.js → EXERCISES.pushup:
+             gifSrc: "assets/pushup.gif",  type: "gif"
+          OR gifSrc: "assets/pushup.mp4",  type: "video"
+        ══════════════════════════════════════════════ -->
+        <!-- ════════════════════════════════════════ -->
+        <!-- EXERCISE DEMO WITH MULTI-VIEW TOGGLE -->
+        <!-- ════════════════════════════════════════ -->
+        <div class="ex-demo-container">
+          <!-- سهم التنقل الأيسر -->
+          <button id="prevDemoBtn" class="demo-nav-btn prev" onclick="toggleDemoView(-1)">&lt;</button>
+          
+          <div class="ex-demo-wrap" id="exDemoWrap">
+            <div class="ex-demo-placeholder" id="exDemoPlaceholder">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.5" opacity="0.3">
+                <polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/>
+              </svg>
+              <span>Select exercise</span>
+            </div>
+          </div>
+
+          <!-- Right navigation arrow -->
+          <button id="nextDemoBtn" class="demo-nav-btn next" onclick="toggleDemoView(1)">&gt;</button>
+        </div>
+
+    </div>
+    <!-- COL 3 ROW 4 — Target Muscles -->
+    <div class="panel panel-right-top wa" id="musclePanel">
+      <div class="panel-title" style="margin-top:10px; margin-bottom:7px;">Target Muscles</div>
+      <div class="muscle-map-wrap">
+        <div id="muscleMapSvg"></div>
+        <div class="muscle-legend" id="muscleLegend">
+          <div style="color:rgba(255,255,255,0.28);font-size:10px;">Select an exercise</div>
+        </div>
+      </div>
+    </div>
+      <!-- COL 2 (center) — Daily Goal centered -->
+      <div class="panel panel-goal wa" id="goalPanel">
+        <div class="ring-container">
+          <svg class="ring-svg" viewBox="0 0 78 78">
+            <circle class="ring-track" cx="39" cy="39" r="34"/>
+            <circle class="ring-fill"  cx="39" cy="39" r="34"/>
+          </svg>
+          <div class="ring-center">
+            <span class="ring-pct">60%</span>
+            <span class="ring-sub">done</span>
+          </div>
+        </div>
+        <div class="goal-info">
+          <div class="goal-title">Daily Goal</div>
+          <div class="goal-stat"><span>18</span> / 30 min</div>
+          <div class="goal-stat"><span>6</span> exercises</div>
+        </div>
+      </div>
+      
+      <!-- COL 3 ROW 4 — Calories -->
+      <div class="panel panel-cals wa" id="calsPanel">
+        <div class="panel-title">Calories</div>
+        <div class="cals-row">
+          <div class="cals-value" id="calsVal">0</div>
+          <div class="cals-unit">kcal</div>
+        </div>
+        <div class="cals-bar"><div class="cals-bar-fill" id="calsBarFill"></div></div>
+      </div>
+
+  </div><!-- /mirror-inner -->
+</div><!-- /mirror-frame -->
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="js/env-config.js"></script>
+<script src="../shared/toast.js"></script>
+<script src="../shared/navbar.js"></script>
+<script src="js/app.js"></script>
+<script src="js/exercise-demo.js"></script>
+<script>
+// Apply display settings from profile
+(function () {
+  const defaults = {
+    show_heartrate: true, show_calories: true, show_skeleton: true,
+    show_reps: true, show_timer: true, show_video: true
+  };
+  const s = { ...defaults, ...JSON.parse(localStorage.getItem("sm_display_settings") || "{}") };
+  const map = {
+    show_heartrate: "healthPanel", show_calories: "calsPanel",
+    show_skeleton:  "skeletonPanel", show_reps:  "repsPanel",
+    show_timer:     "timerPanel",    show_video:  "videoPanel",
+  };
+  Object.entries(map).forEach(([k, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = s[k] ? "" : "none";
+  });
+})();
+</script>
+</body>
 </html>
