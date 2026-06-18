@@ -2,16 +2,106 @@
 <html lang="en" data-theme="dark" dir="ltr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Mirror — Configuration</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Smart Mirror — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/settings-style.css">
+<style>
+.face-scan-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.92); z-index:9000;
+  flex-direction:column; align-items:center; justify-content:center; gap:20px;
+  backdrop-filter:blur(10px);
+}
+.face-scan-overlay.open { display:flex; animation:fadeIn .3s ease; }
+.face-scan-frame {
+  position:relative; width:280px; height:280px;
+  border-radius:50%; overflow:hidden;
+  border:3px solid rgba(58,231,225,.65);
+  box-shadow:0 0 50px rgba(58,231,225,.25);
+}
+.face-scan-frame video { width:100%; height:100%; object-fit:cover; }
+.face-scan-line {
+  position:absolute; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,#3ae7e1,transparent);
+  box-shadow:0 0 8px #3ae7e1; animation:scanLine 2.2s ease-in-out infinite;
+}
+@keyframes scanLine { 0%{top:0%;opacity:.7} 50%{top:100%;opacity:1} 100%{top:0%;opacity:.7} }
+
+.face-scan-status {
+  font-family:'Orbitron',monospace; font-size:12px;
+  letter-spacing:3px; color:#3ae7e1; text-transform:uppercase; text-align:center;
+  min-height:20px;
+}
+.face-scan-status.error { color:#ff4d6a; }
+.face-scan-status.success { color:#5fffc3; }
+
+/* Progress bar for face scan */
+.face-scan-progress {
+  width:280px; height:3px;
+  background:rgba(255,255,255,.1); border-radius:2px; overflow:hidden;
+  display:none;
+}
+.face-scan-progress.show { display:block; }
+.face-scan-progress-fill {
+  height:100%; width:0%; border-radius:2px;
+  background:linear-gradient(90deg,#3ae7e1,#5fffc3);
+  transition:width .3s;
+}
+
+.face-scan-actions { display:flex; gap:12px; }
+.face-scan-close {
+  background:transparent; border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.6); padding:10px 24px; border-radius:8px;
+  cursor:pointer; font-family:'Space Grotesk',sans-serif; font-size:14px; transition:all .2s;
+}
+.face-scan-close:hover { background:rgba(255,255,255,.08); color:#fff; }
+.face-scan-retry {
+  background:rgba(58,231,225,.1); border:1px solid rgba(58,231,225,.3);
+  color:#3ae7e1; padding:10px 24px; border-radius:8px;
+  cursor:pointer; font-family:'Space Grotesk',sans-serif; font-size:14px; transition:all .2s;
+  display:none;
+}
+.face-scan-retry.show { display:block; }
+.face-scan-retry:hover { background:rgba(58,231,225,.2); }
+
+/* QR banner */
+.qr-session-banner { display:none; align-items:center; gap:10px; background:rgba(58,231,225,.1); border:1px solid rgba(58,231,225,.3); border-radius:12px; padding:10px 16px; margin-bottom:20px; }
+.qr-session-banner.show { display:flex; }
+.qr-session-dot { width:7px; height:7px; border-radius:50%; background:#3ae7e1; box-shadow:0 0 8px #3ae7e1; animation:blink 1.8s ease-in-out infinite; flex-shrink:0; }
+@keyframes blink { 0%,80%,100%{opacity:1} 40%{opacity:.2} }
+.qr-session-text { font-size:13px; font-weight:600; color:#3ae7e1; line-height:1.4; }
+.qr-session-text span { display:block; font-size:11px; color:rgba(58,231,225,.6); font-weight:400; }
+
+.btn-face { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:13px 20px; background:rgba(58,231,225,.07); border:1px solid rgba(58,231,225,.28); border-radius:12px; font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; color:#3ae7e1; cursor:pointer; transition:all .3s; }
+.btn-face:hover { background:rgba(58,231,225,.14); border-color:rgba(58,231,225,.5); box-shadow:0 0 20px rgba(58,231,225,.2); transform:translateY(-1px); }
+
+.divider { display:flex; align-items:center; gap:12px; margin:18px 0; color:var(--text-d); font-size:12px; letter-spacing:1px; text-transform:uppercase; }
+.divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.forgot-link { display:block; text-align:right; font-size:12px; color:var(--blue,#6ba3ff); text-decoration:none; font-weight:600; margin-top:5px; transition:color .2s; }
+.forgot-link:hover { color:#3ae7e1; }
+
+.mirror-success-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:9999; flex-direction:column; align-items:center; justify-content:center; gap:20px; }
+.mirror-success-overlay.show { display:flex; animation:fadeIn .4s ease; }
+.mirror-success-icon { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,#3ae7e1,#6ba3ff); display:flex; align-items:center; justify-content:center; font-size:32px; box-shadow:0 0 40px rgba(58,231,225,.5); animation:pop .6s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes pop { 0%{transform:scale(0);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+.mirror-success-title { font-family:'Orbitron',monospace; font-size:clamp(18px,3vw,28px); color:#fff; letter-spacing:2px; }
+.mirror-success-sub { font-size:14px; color:rgba(255,255,255,.5); }
+.mirror-progress-bar { width:180px; height:3px; background:rgba(255,255,255,.1); border-radius:2px; overflow:hidden; }
+.mirror-progress-fill { height:100%; background:linear-gradient(90deg,#3ae7e1,#6ba3ff); border-radius:2px; animation:progressFill 2.5s linear forwards; }
+@keyframes progressFill { from{width:0%} to{width:100%} }
+
+.login-container { display:flex; flex-direction:column; align-items:center; }
+.login-card { width:100%; max-width:440px; }
+
+@media(max-width:480px) { .config-container{padding:16px;} .login-card{padding:20px 16px;} .header-title{font-size:24px!important;} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes fadeInUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+</style>
 </head>
 <body>
 
-<!-- Theme Toggle -->
-<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+<button class="theme-toggle" onclick="toggleTheme()">
   <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="12" cy="12" r="5"/>
     <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
@@ -22,9 +112,31 @@
   <span id="themeLabel">Light Mode</span>
 </button>
 
-<div class="config-container">
+<!-- Face Scan Overlay -->
+<div class="face-scan-overlay" id="faceScanOverlay">
+  <div class="face-scan-frame">
+    <video id="faceVideo" autoplay muted playsinline></video>
+    <div class="face-scan-line"></div>
+  </div>
+  <div class="face-scan-progress" id="faceScanProgress">
+    <div class="face-scan-progress-fill" id="faceScanProgressFill"></div>
+  </div>
+  <div class="face-scan-status" id="faceScanStatus">Position your face in the frame</div>
+  <div class="face-scan-actions">
+    <button class="face-scan-retry" id="faceScanRetryBtn" onclick="retryFaceScan()">Try Again</button>
+    <button class="face-scan-close" onclick="closeFaceScan()">Cancel</button>
+  </div>
+</div>
 
-  <!-- Header -->
+<!-- Mirror unlock success (QR flow) -->
+<div class="mirror-success-overlay" id="mirrorSuccessOverlay">
+  <div class="mirror-success-icon">✓</div>
+  <div class="mirror-success-title" id="mirrorSuccessName">Welcome!</div>
+  <div class="mirror-success-sub">Your Smart Mirror is unlocking</div>
+  <div class="mirror-progress-bar"><div class="mirror-progress-fill"></div></div>
+</div>
+
+<div class="config-container">
   <div class="config-header">
     <div class="header-logo">
       <svg class="logo-icon" viewBox="0 0 32 32" fill="none">
@@ -32,297 +144,290 @@
         <path d="M12 16L15 19L20 14" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
-    <h1 class="header-title" data-t="headerTitle">Smart Mirror Setup</h1>
-    <p class="header-subtitle" data-t="headerSubtitle">Configure your personalized fitness experience</p>
+    <h1 class="header-title">Welcome Back</h1>
+    <p class="header-subtitle">Sign in to your Smart Mirror</p>
   </div>
 
-  <!-- Step Progress -->
-  
-
-  <!-- ═══ STEP 1: ACCOUNT ═══ -->
-  <div class="step-panel active" id="step-0">
-    <div class="card">
-      <h2 class="card-title" id="authTitle" data-t="authTitleRegister">Create Your Account</h2>
-      <p class="card-desc" data-t="authDesc">Get started with your personalized fitness journey</p>
-      <div class="success-msg" id="successMsg">
-        <span>✓</span><span data-t="successMsg">Account created successfully!</span>
+  <div class="login-container">
+    <div class="card login-card">
+      <!-- QR banner (shown when opened via QR scan) -->
+      <div class="qr-session-banner" id="qrBanner">
+        <div class="qr-session-dot"></div>
+        <div class="qr-session-text">
+          Mirror Connected — Sign in to unlock
+          <span id="qrSessionLabel">Session loading...</span>
+        </div>
       </div>
-      <div class="form-group" id="nameField">
-        <label class="form-label" data-t="authNameLabel">Full Name</label>
-        <input type="text" class="form-input" id="fullName" data-ph="authNamePlaceholder" placeholder="John Doe">
+
+      <h2 class="card-title">Welcome Back</h2>
+      <p class="card-desc">Sign in to your account</p>
+
+      <!-- Face Login Button -->
+      <button class="btn-face" onclick="openFaceScan()">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 3H5a2 2 0 0 0-2 2v4"/><path d="M15 3h4a2 2 0 0 1 2 2v4"/>
+          <path d="M9 21H5a2 2 0 0 1-2-2v-4"/><path d="M15 21h4a2 2 0 0 0 2-2v-4"/>
+          <circle cx="12" cy="10" r="3"/>
+          <path d="M9 16c0-1.66 1.34-3 3-3s3 1.34 3 3"/>
+        </svg>
+        Login with Face ID
+      </button>
+
+      <div class="divider">or sign in with email</div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="emailInput" placeholder="john@example.com"
+               autocomplete="email" onkeypress="if(event.key==='Enter')document.getElementById('passInput').focus()">
       </div>
       <div class="form-group">
-        <label class="form-label" data-t="authEmailLabel">Email Address</label>
-        <input type="email" class="form-input" id="emailInput" data-ph="authEmailPlaceholder" placeholder="john@example.com">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="passInput" placeholder="••••••••"
+               autocomplete="current-password" onkeypress="if(event.key==='Enter')handleLogin()">
+        <a class="forgot-link" href="forgot-password.html">Forgot password?</a>
       </div>
-      <div class="form-group">
-        <label class="form-label" data-t="authPasswordLabel">Password</label>
-        <input type="password" class="form-input" id="passInput" data-ph="authPasswordPlaceholder" placeholder="••••••••">
+
+      <button class="btn btn-primary" id="loginBtn" style="width:100%;margin-top:1rem;" onclick="handleLogin()">
+        Sign In →
+      </button>
+
+      <div class="auth-toggle" style="margin-top:1.5rem;text-align:center;">
+        <span>Don't have an account?</span>
+        <a href="smart-mirror-settings.html"> Create one</a>
       </div>
-      <div class="form-group" id="confirmField">
-        <label class="form-label" data-t="authConfirmLabel">Confirm Password</label>
-        <input type="password" class="form-input" id="confirmInput" data-ph="authPasswordPlaceholder" placeholder="••••••••">
-      </div>
-      <div class="auth-toggle">
-        <span id="authToggleText" data-t="authToggleRegister">Already have an account?</span>
-        <a href="smart-mirror-settings.html" id="authToggleLink" data-t="authLinkRegister"> Sign In</a>
-      </div>
-    </div>
-    <div class="wizard-nav">
-      <div class="nav-left"></div>
-     
-      <div class="nav-right">
-        <button class="btn btn-primary" onclick="submitForm()" data-t="btnSubmit">Submit →</button>
+
+      <div style="margin-top:14px;text-align:center;">
+        <a href="../setup/qr-login.html"
+           style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;font-size:12px;font-weight:600;color:rgba(255,255,255,.45);text-decoration:none;transition:all .25s;"
+           onmouseover="this.style.borderColor='rgba(58,231,225,.3)';this.style.color='#3ae7e1'"
+           onmouseout="this.style.borderColor='rgba(255,255,255,.1)';this.style.color='rgba(255,255,255,.45)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            <path d="M14 14h3v3m0 4h4v-4m-4 0h-3"/>
+          </svg>
+          Back to Mirror / Scan QR
+        </a>
       </div>
     </div>
   </div>
-
-  <!-- ═══ STEP 2: LANGUAGE ═══ -->
-  <div class="step-panel" id="step-1">
-    <div class="card">
-      <h2 class="card-title" data-t="langTitle">Language Preferences</h2>
-      <p class="card-desc" data-t="langDesc">Choose your preferred language and region settings</p>
-      <div class="form-group">
-        <label class="form-label" data-t="langDisplayLabel">Display Language</label>
-        <select class="form-select" id="langSelect" onchange="onLangChange(this.value)">
-          <option value="en">English</option>
-          <option value="ar">العربية (Arabic)</option>
-          <option value="es">Español (Spanish)</option>
-          <option value="fr">Français (French)</option>
-          <option value="de">Deutsch (German)</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label" data-t="langVoiceLabel">Voice Feedback Language</label>
-        <select class="form-select">
-          <option value="en-US">English (US)</option>
-          <option value="en-GB">English (UK)</option>
-          <option value="ar-SA">Arabic</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" data-t="langUnitsLabel">Units</label>
-          <select class="form-select">
-            <option value="metric"   data-t="langUnitsMetric">Metric (kg, cm)</option>
-            <option value="imperial" data-t="langUnitsImperial">Imperial (lb, in)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-t="langTimeLabel">Time Format</label>
-          <select class="form-select">
-            <option value="12h" data-t="langTime12">12-hour</option>
-            <option value="24h" data-t="langTime24">24-hour</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="wizard-nav">
-      <div class="nav-left"><button class="btn" onclick="goPrev()" data-t="btnBack">← Back</button></div>
-      <span class="step-counter" data-step="2"></span>
-      <div class="nav-right"><button class="btn btn-primary" onclick="goNext()" data-t="btnNext">Next →</button></div>
-    </div>
-  </div>
-
-  <!-- ═══ STEP 3: TRAINING ═══ -->
-  <div class="step-panel" id="step-2">
-    <div class="card">
-      <h2 class="card-title" data-t="trainingTitle">Training Type</h2>
-      <p class="card-desc" data-t="trainingDesc">Select your primary workout focus</p>
-      <div class="option-grid">
-        <div class="option-card" data-group="training" data-val="strength" onclick="selectOption(this)">
-          <div class="option-icon">💪</div>
-          <div class="option-title" data-t="trainingStrength">Strength Training</div>
-          <div class="option-desc"  data-t="trainingStrengthDesc">Build muscle and power</div>
-        </div>
-        <div class="option-card selected" data-group="training" data-val="cardio" onclick="selectOption(this)">
-          <div class="option-icon">🏃</div>
-          <div class="option-title" data-t="trainingCardio">Cardio</div>
-          <div class="option-desc"  data-t="trainingCardioDesc">Improve endurance</div>
-        </div>
-        <div class="option-card" data-group="training" data-val="yoga" onclick="selectOption(this)">
-          <div class="option-icon">🧘</div>
-          <div class="option-title" data-t="trainingYoga">Yoga &amp; Flexibility</div>
-          <div class="option-desc"  data-t="trainingYogaDesc">Enhance mobility</div>
-        </div>
-        <div class="option-card" data-group="training" data-val="hiit" onclick="selectOption(this)">
-          <div class="option-icon">⚡</div>
-          <div class="option-title" data-t="trainingHiit">HIIT</div>
-          <div class="option-desc"  data-t="trainingHiitDesc">High-intensity intervals</div>
-        </div>
-        <div class="option-card" data-group="training" data-val="sports" onclick="selectOption(this)">
-          <div class="option-icon">⚽</div>
-          <div class="option-title" data-t="trainingSports">Sports Training</div>
-          <div class="option-desc"  data-t="trainingSportsDesc">Sport-specific drills</div>
-        </div>
-        <div class="option-card" data-group="training" data-val="mixed" onclick="selectOption(this)">
-          <div class="option-icon">🔄</div>
-          <div class="option-title" data-t="trainingMixed">Mixed Training</div>
-          <div class="option-desc"  data-t="trainingMixedDesc">Balanced approach</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <h2 class="card-title" data-t="levelTitle">Fitness Level</h2>
-      <p class="card-desc" data-t="levelDesc">Help us tailor your workouts</p>
-      <div class="option-grid">
-        <div class="option-card" data-group="level" data-val="beginner" onclick="selectOption(this)">
-          <div class="option-icon">🌱</div>
-          <div class="option-title" data-t="levelBeginner">Beginner</div>
-          <div class="option-desc"  data-t="levelBeginnerDesc">Starting my journey</div>
-        </div>
-        <div class="option-card selected" data-group="level" data-val="intermediate" onclick="selectOption(this)">
-          <div class="option-icon">🔥</div>
-          <div class="option-title" data-t="levelIntermediate">Intermediate</div>
-          <div class="option-desc"  data-t="levelIntermediateDesc">Regular workouts</div>
-        </div>
-        <div class="option-card" data-group="level" data-val="advanced" onclick="selectOption(this)">
-          <div class="option-icon">🏆</div>
-          <div class="option-title" data-t="levelAdvanced">Advanced</div>
-          <div class="option-desc"  data-t="levelAdvancedDesc">Experienced athlete</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label" data-t="weeklyGoalsLabel">Weekly Training Goals</label>
-        <select class="form-select">
-          <option value="2-3"    data-t="weeklyGoals23">2-3 sessions per week</option>
-          <option value="4-5"    data-t="weeklyGoals45" selected>4-5 sessions per week</option>
-          <option value="6-7"    data-t="weeklyGoals67">6-7 sessions per week</option>
-          <option value="custom" data-t="weeklyGoalsCustom">Custom schedule</option>
-        </select>
-      </div>
-    </div>
-    <div class="wizard-nav">
-      <div class="nav-left"><button class="btn" onclick="goPrev()" data-t="btnBack">← Back</button></div>
-      <span class="step-counter" data-step="3"></span>
-      <div class="nav-right"><button class="btn btn-primary" onclick="goNext()" data-t="btnNext">Next →</button></div>
-    </div>
-  </div>
-
-  <!-- ═══ STEP 4: PREFERENCES ═══ -->
-  <div class="step-panel" id="step-3">
-    <div class="card">
-      <h2 class="card-title" data-t="prefDisplayTitle">Display Settings</h2>
-      <p class="card-desc" data-t="prefDisplayDesc">Customize your mirror interface</p>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefHeartRate">Show Heart Rate Monitor</div><div class="toggle-desc" data-t="prefHeartRateDesc">Display real-time heart rate data</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefCalories">Show Calorie Counter</div><div class="toggle-desc" data-t="prefCaloriesDesc">Track calories burned during workout</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefSkeleton">Show Skeleton Tracking</div><div class="toggle-desc" data-t="prefSkeletonDesc">Real-time form analysis overlay</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefReps">Show Rep Counter</div><div class="toggle-desc" data-t="prefRepsDesc">Automatic repetition counting</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-    </div>
-    <div class="card">
-      <h2 class="card-title" data-t="prefAudioTitle">Audio &amp; Voice</h2>
-      <p class="card-desc" data-t="prefAudioDesc">Configure audio feedback settings</p>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefVoice">Voice Coaching</div><div class="toggle-desc" data-t="prefVoiceDesc">Get audio guidance during workouts</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefAlerts">Form Correction Alerts</div><div class="toggle-desc" data-t="prefAlertsDesc">Audio alerts for improper form</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefMotivation">Motivational Prompts</div><div class="toggle-desc" data-t="prefMotivationDesc">Encouragement during tough sets</div></div>
-        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
-      </div>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefMusic">Background Music</div><div class="toggle-desc" data-t="prefMusicDesc">Play music during workouts</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-    </div>
-    <div class="wizard-nav">
-      <div class="nav-left"><button class="btn" onclick="goPrev()" data-t="btnBack">← Back</button></div>
-      <span class="step-counter" data-step="4"></span>
-      <div class="nav-right"><button class="btn btn-primary" onclick="goNext()" data-t="btnNext">Next →</button></div>
-    </div>
-  </div>
-
-  <!-- ═══ STEP 5: PROFILE ═══ -->
-  <div class="step-panel" id="step-4">
-    <div class="card">
-      <h2 class="card-title" data-t="profileTitle">Your Profile</h2>
-      <p class="card-desc" data-t="profileDesc">Personal information and fitness data</p>
-      <div class="profile-avatar">JD<div class="avatar-edit">📷</div></div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" data-t="profileFirstName">First Name</label>
-          <input type="text" class="form-input" id="p_first" value="John">
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-t="profileLastName">Last Name</label>
-          <input type="text" class="form-input" id="p_last" value="Doe">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" data-t="profileAge">Age</label>
-          <input type="number" class="form-input" id="p_age" value="28">
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-t="profileGender">Gender</label>
-          <select class="form-select" id="p_gender">
-            <option value="male"   data-t="profileGenderMale">Male</option>
-            <option value="female" data-t="profileGenderFemale">Female</option>
-            <option value="other"  data-t="profileGenderOther">Other</option>
-            <option value="prefer" data-t="profileGenderPrefer">Prefer not to say</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" data-t="profileHeight">Height (cm)</label>
-          <input type="number" class="form-input" id="p_height" value="175">
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-t="profileWeight">Weight (kg)</label>
-          <input type="number" class="form-input" id="p_weight" value="70">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label" data-t="profileGoalsLabel">Fitness Goals</label>
-        <select class="form-select" id="p_goal">
-          <option value="lose-weight"          data-t="profileGoalLoseWeight">Lose Weight</option>
-          <option value="build-muscle"         data-t="profileGoalBuildMuscle">Build Muscle</option>
-          <option value="improve-endurance"    data-t="profileGoalEndurance">Improve Endurance</option>
-          <option value="increase-flexibility" data-t="profileGoalFlexibility">Increase Flexibility</option>
-          <option value="general-fitness"      data-t="profileGoalGeneral">General Fitness</option>
-          <option value="athletic-performance" data-t="profileGoalAthletic">Athletic Performance</option>
-        </select>
-      </div>
-    </div>
-    <div class="wizard-nav">
-      <div class="nav-left"><button class="btn" onclick="goPrev()" data-t="btnBack">← Back</button></div>
-      <span class="step-counter" data-step="5"></span>
-      <div class="nav-right"><button class="btn btn-submit" onclick="submitForm()" data-t="btnSubmit">✓ Complete Setup</button></div>
-    </div>
-  </div>
-
-  <!-- ═══ FINAL SUCCESS ═══ -->
-  <div class="final-success card" id="finalSuccess">
-    <div class="success-icon">✓</div>
-    <h2 data-t="finalTitle">Setup Complete!</h2>
-    <p data-t="finalDesc">Your Smart Mirror is configured and ready. Your personalized fitness experience awaits.</p>
-    <button class="btn btn-submit" onclick="resetForm()" data-t="btnReset">Start Fresh ↺</button>
-  </div>
-
 </div>
 
-<!-- PHP form -->
-<form id="phpForm" method="POST" action="save-config.php" style="display:none;">
-  <input type="hidden" name="config_data" id="configDataInput">
-</form>
+<script src="../shared/toast.js"></script>
+<script>
+const BACKEND_URL = "http://localhost:3000";
 
-<script src="js/sign-script.js"></script>
+// ════════════════════════════════════════
+// QR SESSION
+// ════════════════════════════════════════
+const urlParams  = new URLSearchParams(window.location.search);
+const SESSION_ID = urlParams.get("session") || "";
+
+if (SESSION_ID) {
+  document.getElementById("qrBanner").classList.add("show");
+  document.getElementById("qrSessionLabel").textContent = "Session: " + SESSION_ID.slice(0, 8) + "...";
+}
+
+// ════════════════════════════════════════
+// EMAIL / PASSWORD LOGIN
+// ════════════════════════════════════════
+async function handleLogin() {
+  const email    = document.getElementById("emailInput").value.trim();
+  const password = document.getElementById("passInput").value;
+  const btn      = document.getElementById("loginBtn");
+
+  if (!email || !password) { toast.error("Please enter your email and password."); return; }
+
+  btn.disabled = true; btn.textContent = "Signing in...";
+
+  try {
+    const res  = await fetch(`${BACKEND_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+
+    if (!data.ok) {
+      toast.error(data.error || "Incorrect email or password.", "Login Failed");
+      btn.disabled = false; btn.textContent = "Sign In →";
+      return;
+    }
+
+    localStorage.setItem("token", data.token);
+    const name = data.name || email.split("@")[0];
+
+    if (SESSION_ID) {
+      // QR flow: notify mirror via backend, then show success
+      await notifyMirror(SESSION_ID, data.token, name);
+      showMirrorSuccess(name);
+      return;
+    }
+
+    toast.success("Login successful!", "Welcome Back");
+    setTimeout(() => { window.location.href = "../dashboard/index.html"; }, 700);
+
+  } catch (err) {
+    toast.error("Server error. Please try again.", "Error");
+    btn.disabled = false; btn.textContent = "Sign In →";
+  }
+}
+
+async function notifyMirror(sessionId, token, name) {
+  try {
+    await fetch(`${BACKEND_URL}/api/auth/qr-confirm`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session: sessionId, token, name }),
+    });
+  } catch { /* silent — mirror also has socket listener */ }
+}
+
+function showMirrorSuccess(name) {
+  document.getElementById("mirrorSuccessName").textContent = `Welcome, ${name}!`;
+  document.getElementById("mirrorSuccessOverlay").classList.add("show");
+}
+
+// ════════════════════════════════════════
+// FACE LOGIN
+// Calls POST /api/face/faceLogin
+// Backend hits Python AI server at localhost:8000/face/recognize
+// ════════════════════════════════════════
+let faceStream   = null;
+let faceScanning = false;
+
+async function openFaceScan() {
+  const overlay   = document.getElementById("faceScanOverlay");
+  const video     = document.getElementById("faceVideo");
+  const statusEl  = document.getElementById("faceScanStatus");
+  const retryBtn  = document.getElementById("faceScanRetryBtn");
+  const progressEl = document.getElementById("faceScanProgress");
+
+  overlay.classList.add("open");
+  statusEl.className = "face-scan-status";
+  statusEl.textContent = "Starting camera...";
+  retryBtn.classList.remove("show");
+  progressEl.classList.remove("show");
+
+  try {
+    faceStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 480, height: 480, facingMode: "user" },
+      audio: false,
+    });
+    video.srcObject = faceStream;
+
+    // Wait for video to be ready
+    video.onloadedmetadata = () => {
+      statusEl.textContent = "Hold still — scanning...";
+      progressEl.classList.add("show");
+      document.getElementById("faceScanProgressFill").style.width = "0%";
+
+      // Animate progress bar while scanning
+      let prog = 0;
+      const progTimer = setInterval(() => {
+        prog = Math.min(prog + 4, 85);
+        document.getElementById("faceScanProgressFill").style.width = prog + "%";
+      }, 120);
+
+      // Slight delay to let camera stabilize
+      setTimeout(async () => {
+        await performFaceLogin(statusEl, retryBtn, progressEl, progTimer);
+      }, 1800);
+    };
+  } catch (err) {
+    statusEl.textContent = "Camera access denied";
+    statusEl.className = "face-scan-status error";
+    retryBtn.classList.add("show");
+    toast.error("Could not access camera. Check browser permissions.", "Camera Error");
+  }
+}
+
+async function performFaceLogin(statusEl, retryBtn, progressEl, progTimer) {
+  statusEl.textContent = "Recognizing...";
+
+  try {
+    // Call backend — which triggers Python AI server to capture + recognize
+    const res  = await fetch(`${BACKEND_URL}/api/face/faceLogin`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+
+    clearInterval(progTimer);
+    document.getElementById("faceScanProgressFill").style.width = "100%";
+
+    if (!data.ok) {
+      statusEl.textContent = data.error || "Face not recognized";
+      statusEl.className = "face-scan-status error";
+      retryBtn.classList.add("show");
+      toast.error("Face not recognized. Please try again or sign in with email.", "Face ID Failed");
+      stopFaceStream();
+      return;
+    }
+
+    // Success
+    statusEl.textContent = `Welcome, ${data.name || "User"}!`;
+    statusEl.className = "face-scan-status success";
+
+    localStorage.setItem("token", data.token);
+
+    if (SESSION_ID) {
+      await notifyMirror(SESSION_ID, data.token, data.name || "User");
+      setTimeout(() => {
+        closeFaceScan();
+        showMirrorSuccess(data.name || "User");
+      }, 1000);
+      return;
+    }
+
+    toast.success(`Welcome back, ${data.name || "User"}!`, "Face ID Login");
+    setTimeout(() => {
+      closeFaceScan();
+      window.location.href = "../dashboard/index.html";
+    }, 1200);
+
+  } catch (err) {
+    clearInterval(progTimer);
+    statusEl.textContent = "Connection error — try email login";
+    statusEl.className = "face-scan-status error";
+    retryBtn.classList.add("show");
+    toast.error("Could not connect to the AI server.", "Error");
+    stopFaceStream();
+  }
+}
+
+function retryFaceScan() {
+  closeFaceScan();
+  setTimeout(openFaceScan, 300);
+}
+
+function closeFaceScan() {
+  document.getElementById("faceScanOverlay").classList.remove("open");
+  stopFaceStream();
+}
+
+function stopFaceStream() {
+  if (faceStream) {
+    faceStream.getTracks().forEach(t => t.stop());
+    faceStream = null;
+  }
+}
+
+// ════════════════════════════════════════
+// THEME
+// ════════════════════════════════════════
+function toggleTheme() {
+  const html   = document.documentElement;
+  const isDark = html.getAttribute("data-theme") === "dark";
+  html.setAttribute("data-theme", isDark ? "light" : "dark");
+  document.getElementById("themeLabel").textContent = isDark ? "Dark Mode" : "Light Mode";
+  document.getElementById("themeIcon").innerHTML = isDark
+    ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor" stroke="none"/>'
+    : `<circle cx="12" cy="12" r="5"/>
+       <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+       <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+       <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+       <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+}
+</script>
 </body>
 </html>

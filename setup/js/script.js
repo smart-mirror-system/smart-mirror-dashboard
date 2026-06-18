@@ -1,4 +1,18 @@
+// ════════════════════════════════════════
+// GLOBAL STATE & VARIABLES
+// ════════════════════════════════════════
 let token = localStorage.getItem("token") || null;
+let currentStep = 0;
+let currentLang = 'en';
+let isRegisterMode = true; 
+const TOTAL = 5;
+
+// Global variable to hold the profile image base64 data string
+let base64Avatar = "";
+
+// ════════════════════════════════════════
+// AUTHENTICATION LOGIC (Login / Register)
+// ════════════════════════════════════════
 async function handleAuth() {
   const email = document.getElementById("emailInput").value;
   const password = document.getElementById("passInput").value;
@@ -9,8 +23,16 @@ async function handleAuth() {
     : "http://localhost:3000/api/auth/login";
 
   const body = isRegisterMode
-    ? { email, password, profile: { name } }
-    : { email, password };
+      ? { 
+          email, 
+          password, 
+          profile: { 
+            name: name,
+            firstName: name,
+            lastName: ""
+          } 
+        }
+      : { email, password };
 
   try {
     const res = await fetch(url, {
@@ -22,17 +44,17 @@ async function handleAuth() {
     const data = await res.json();
 
     if (!data.ok) {
-      alert(data.error);
+      toast.error(data.error || "Registration failed.", "Error");
       return false;
     }
 
-    // لو login
+    // if login
     if (data.token) {
       token = data.token;
       localStorage.setItem("token", token);
     }
 
-    // لو register → اعمل login بعده مباشرة
+    // if register, auto-login after successful registration
     if (isRegisterMode) {
       return await autoLogin(email, password);
     }
@@ -41,26 +63,28 @@ async function handleAuth() {
 
   } catch (err) {
     console.error(err);
-    alert("Server error");
+    toast.error("Server connection error.", "Connection Error");
     return false;
   }
 }
 async function autoLogin(email, password) {
-  const res = await fetch("http://localhost:3000/api/auth/login", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ email, password })
-  });
-
-  const data = await res.json();
-
-  if (data.token) {
-    token = data.token;
-    localStorage.setItem("token", token);
-    return true;
+  try {
+    const res = await fetch("http://localhost:3000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (data.ok && data.token) {
+      token = data.token;
+      localStorage.setItem("token", token);
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.error(err);
+    return false;
   }
-
-  return false;
 }
 /* ════════════════════════════════════════
    TRANSLATIONS (EN, AR, ES, FR, DE)
@@ -338,13 +362,6 @@ const translations = {
   }
 };
 
-/* ════════════════════════════════════════
-   STATE
-════════════════════════════════════════ */
-let currentStep    = 0;
-let currentLang    = 'en';
-let isRegisterMode = true;
-const TOTAL        = 5;
 
 /* ════════════════════════════════════════
    TRANSLATION ENGINE
@@ -414,7 +431,7 @@ function refreshAuthMode(){
   confFld.style.display  = isRegisterMode ? '' : 'none';
 }
 
-document.getElementById('authToggleLink').addEventListener('click', e => {
+document.getElementById('authToggleLink')?.addEventListener('click', e => {
   e.preventDefault();
   isRegisterMode = !isRegisterMode;
   refreshAuthMode();
@@ -444,26 +461,226 @@ function updateProgress(){
   }
 }
 
-function showStep(n){
-  document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
-  const panel = document.getElementById('step-'+n);
-  if(panel) panel.classList.add('active');
+// ════════════════════════════════════════
+// MULTI-STEP WIZARD NAVIGATION LOGIC
+// ════════════════════════════════════════
+function showStep(n) {
+  const steps = document.querySelectorAll('.step-panel');
+  steps.forEach(p => p.classList.remove('active'));
+  steps[n].classList.add('active');
   updateProgress();
   window.scrollTo({top:0,behavior:'smooth'});
+
+  const indicator = document.getElementById('stepIndicator');
+  if (indicator) {
+    indicator.textContent = `Step ${n + 1} of ${TOTAL}`;
+  }
+
+  const btnPrev = document.getElementById('btnPrev');
+  if (btnPrev) {
+    btnPrev.style.display = n === 0 ? 'none' : 'inline-block';
+  }
+
+  const btnNext = document.getElementById('btnNext');
+  if (btnNext) {
+    btnNext.textContent = n === TOTAL - 1 ? 'Complete Setup' : 'Next';
+  }
+
+  // Inject user's registration name initials dynamically inside Step 5 (Profile)
+  if (n === TOTAL - 1) { 
+    const registrationName = document.getElementById("fullName")?.value || "";
+    const avatarContent = document.getElementById("avatarContent");
+    
+    // Only trigger if no custom uploaded or captured image is currently active
+    if (avatarContent && !base64Avatar) {
+      if (registrationName.trim()) {
+        const firstLetter = registrationName.trim().charAt(0).toUpperCase();
+        avatarContent.textContent = firstLetter;
+      } else {
+        avatarContent.textContent = "U"; 
+      }
+    }
+  }
 }
 
 async function goNext() {
   if (currentStep === 0) {
     const ok = await handleAuth();
-    if (!ok) return;
+    if (!ok) return; 
   }
 
   if (currentStep < TOTAL - 1) {
     currentStep++;
     showStep(currentStep);
+  } else {
+    await submitForm();
   }
 }
-function goPrev(){ if(currentStep>0){       currentStep--; showStep(currentStep); } }
+
+function goPrev() {
+  if (currentStep > 0) {
+    currentStep--;
+    showStep(currentStep);
+  }
+}
+
+// ════════════════════════════════════════
+// FORM DATA AGGREGATION & SUBMISSION
+// ════════════════════════════════════════
+function collectFormData() {
+  const registrationName = document.getElementById("fullName")?.value || "";
+  const nameParts = registrationName.trim().split(" ");
+  const fallbackFirst = nameParts[0] || "";
+  const fallbackLast = nameParts.slice(1).join(" ") || "";
+
+  return {
+    language: (document.getElementById('p_lang')||{}).value || 'en',
+    training: {
+      experience: (document.getElementById('p_exp')||{}).value || '',
+      level:      (document.getElementById('p_lvl')||{}).value || ''
+    },
+    preferences: {
+      theme:      (document.getElementById('p_theme')||{}).value || 'dark'
+    },
+    profile: {
+      firstName:   fallbackFirst,
+      lastName:    fallbackLast,
+      name:        registrationName,
+      avatar:      base64Avatar, 
+      age:         (document.getElementById('p_age')||{}).value ? Number(document.getElementById('p_age').value) : 28,
+      height:      (document.getElementById('p_height')||{}).value ? Number(document.getElementById('p_height').value) : 175,
+      weight:      (document.getElementById('p_weight')||{}).value ? Number(document.getElementById('p_weight').value) : 70,
+      gender:      (document.getElementById('p_gender')||{}).value || 'male',
+      fitnessGoal: (document.getElementById('p_goal')||{}).value || 'general-fitness'
+    }
+  };
+}
+
+async function submitForm() {
+  const data = collectFormData();
+
+  try {
+    const res = await fetch("http://localhost:3000/api/user/setup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (!result.ok) {
+      toast.error(result.error || "Error saving data", "Save Failed");
+      return;
+    }
+    toast.success("Setup completed successfully!", "Welcome");
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('finalSuccess').classList.add('show');
+
+    setTimeout(() => {
+      window.location.href = "../dashboard/index.html";
+    }, 1500);
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Server connection error.", "Connection Error");
+  }
+}
+
+function resetForm() {
+  currentStep = 0; 
+  isRegisterMode = true;
+  base64Avatar = "";
+  const avatarContent = document.getElementById("avatarContent");
+  if (avatarContent) avatarContent.innerHTML = "";
+  document.getElementById('finalSuccess').classList.remove('show');
+  document.getElementById('stepProgress').style.opacity = '1';
+  applyTranslations();
+  showStep(0);
+}
+
+// ════════════════════════════════════════
+// AVATAR INTERACTIONS (File Upload & Live Webcam Capture)
+// ════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", () => {
+  // Click listener for the profile avatar zone to trigger standard file picker
+  document.getElementById("avatarClickZone")?.addEventListener("click", function() {
+    document.getElementById("p_avatar")?.click();
+  });
+
+  // Handle local file uploads and read them into standard Base64 representation URL strings
+  document.getElementById("p_avatar")?.addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        base64Avatar = event.target.result;
+        const avatarContent = document.getElementById("avatarContent");
+        if (avatarContent) {
+          avatarContent.innerHTML = `<img src="${base64Avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;" />`;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Live Webcam Capture Handler Initialization
+  const video = document.getElementById("webcamVideo");
+  const canvas = document.getElementById("webcamCanvas");
+  const btnCapture = document.getElementById("btnCaptureCamera");
+  let streamRef = null;
+
+  btnCapture?.addEventListener("click", async () => {
+    const avatarContent = document.getElementById("avatarContent");
+    
+    // Step A: If video stream is not running, request webcam access permissions
+    if (!streamRef) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 300, height: 300 }, audio: false });
+        streamRef = stream;
+        if (video) {
+          video.srcObject = stream;
+          video.style.display = "block"; // Display stream container view window
+        }
+        if (avatarContent) avatarContent.style.display = "none"; // Temporarily hide initial text
+        btnCapture.textContent = "📸 Snap Photo"; // Toggle contextual dynamic operational label text
+        btnCapture.style.background = "var(--green)";
+      } catch (err) {
+        console.error("Camera access denied or unmapped:", err);
+        alert("Could not access webcam device.");
+      }
+    } 
+    // Step B: Stream is active, treat this second click as a hardware shutter snapshot event
+    else {
+      if (video && canvas) {
+        const ctx = canvas.getContext("2d");
+        canvas.width = video.videoWidth || 300;
+        canvas.height = video.videoHeight || 300;
+        
+        // Render current stream raster frames into memory canvas boundaries
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Export raw frame canvas memory blocks into persistent Base64 representation assets
+        base64Avatar = canvas.toDataURL("image/jpeg");
+        
+        if (avatarContent) {
+          avatarContent.innerHTML = `<img src="${base64Avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;" />`;
+          avatarContent.style.display = "block";
+        }
+        
+        // Tear down active media stream trackers to release hardware camera indicators safely
+        streamRef.getTracks().forEach(track => track.stop());
+        streamRef = null;
+        video.style.display = "none";
+        
+        btnCapture.textContent = "📸 Retake Live Photo";
+        btnCapture.style.background = "rgba(255,255,255,0.08)";
+      }
+    }
+  });
+});
 
 /* ════════════════════════════════════════
    OPTION CARDS
@@ -495,94 +712,3 @@ function toggleTheme(){
       <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
   }
 }
-
-/* ════════════════════════════════════════
-   COLLECT & SUBMIT
-════════════════════════════════════════ */
-function collectFormData(){
-  const toggles    = document.querySelectorAll('#step-3 .toggle-switch');
-  const toggleKeys = ['heartRate','calories','skeleton','reps','voiceCoaching','formAlerts','motivation','music'];
-  const prefs      = {};
-  toggleKeys.forEach((k,i)=>{ prefs[k]=toggles[i]?toggles[i].classList.contains('active'):false; });
-
-  const trCard = document.querySelector('[data-group="training"].selected');
-  const lvCard = document.querySelector('[data-group="level"].selected');
-  const wkSel  = document.querySelector('#step-2 select');
-  const lSels  = document.querySelectorAll('#step-1 select');
-
-  return {
-    account:{
-      mode:  isRegisterMode?'register':'login',
-      name:  (document.getElementById('fullName')||{}).value||'',
-      email: (document.getElementById('emailInput')||{}).value||''
-    },
-    language:{
-      display: lSels[0]?lSels[0].value:'',
-      voice:   lSels[1]?lSels[1].value:'',
-      units:   lSels[2]?lSels[2].value:'',
-      time:    lSels[3]?lSels[3].value:''
-    },
-    training:{
-      type:       trCard?trCard.getAttribute('data-val'):'',
-      level:      lvCard?lvCard.getAttribute('data-val'):'',
-      weeklyGoal: wkSel?wkSel.value:''
-    },
-    preferences: prefs,
-    profile:{
-      firstName:   (document.getElementById('p_first')||{}).value||'',
-      lastName:    (document.getElementById('p_last')||{}).value||'',
-      age:         (document.getElementById('p_age')||{}).value||'',
-      height:      (document.getElementById('p_height')||{}).value||'',
-      weight:      (document.getElementById('p_weight')||{}).value||'',
-      gender:      (document.getElementById('p_gender')||{}).value||'',
-      fitnessGoal: (document.getElementById('p_goal')||{}).value||''
-    }
-  };
-}
-
-async function submitForm() {
-  const data = collectFormData();
-
-  try {
-    const res = await fetch("http://localhost:3000/api/user/setup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
-      body: JSON.stringify(data)
-    });
-
-    const result = await res.json();
-
-    if (!result.ok) {
-      alert(result.error || "Error saving data");
-      return;
-    }
-
-    document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
-    document.getElementById('finalSuccess').classList.add('show');
-
-    setTimeout(() => {
-      window.location.href = "/dashboard/index.html";
-    }, 1500);
-
-  } catch (err) {
-    console.error(err);
-    alert("Server error");
-  }
-}
-
-function resetForm(){
-  currentStep=0; isRegisterMode=true;
-  document.getElementById('finalSuccess').classList.remove('show');
-  document.getElementById('stepProgress').style.opacity='1';
-  applyTranslations();
-  showStep(0);
-}
-
-/* ════════════════════════════════════════
-   INIT
-════════════════════════════════════════ */
-applyTranslations();
-updateProgress();

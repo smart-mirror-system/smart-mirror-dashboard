@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SmartMirror — Mobile Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── Mobile-first, optimized for phone screens ── */
+    :root {
+      --cyan: #3ae7e1;
+      --blue: #6ba3ff;
+      --green: #5fffc3;
+      --red: #ff4d6a;
+      --bg: #080e18;
+      --card: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.1);
+      --text: rgba(255,255,255,0.9);
+      --dim: rgba(255,255,255,0.45);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html,body { height:100%; }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient glows */
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 20%, rgba(107,163,255,.08), transparent 60%),
+        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(58,231,225,.06), transparent 60%);
+      pointer-events:none;
+    }
+
+    /* Logo area */
+    .mobile-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      animation: fadeDown 0.6s ease both;
+    }
+    .mobile-logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 18px rgba(58,231,225,0.3);
+    }
+    .mobile-logo-icon svg { width: 20px; height: 20px; }
+    .mobile-logo-name {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    /* Card */
+    .mobile-card {
+      width: 100%;
+      max-width: 380px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 24px;
+      backdrop-filter: blur(20px);
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    /* Session badge */
+    .session-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(58,231,225,0.1);
+      border: 1px solid rgba(58,231,225,0.25);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .session-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 6px var(--cyan);
+      animation: blink 1.8s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,80%,100%{opacity:1} 40%{opacity:.2} }
+
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 14px; color: var(--dim); margin-bottom: 24px; line-height: 1.5; }
+    .mirror-session {
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      font-family: monospace;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+    }
+
+    /* Form */
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 8px;
+    }
+    .field input {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px; /* 16px prevents iOS zoom */
+      color: var(--text);
+      outline: none;
+      transition: all 0.3s;
+      -webkit-appearance: none;
+    }
+    .field input::placeholder { color: rgba(255,255,255,0.3); }
+    .field input:focus {
+      border-color: var(--cyan);
+      background: rgba(58,231,225,0.06);
+      box-shadow: 0 0 0 3px rgba(58,231,225,0.12);
+    }
+
+    /* Submit button */
+    .btn-submit-mobile {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      border: none;
+      border-radius: 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #000;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(58,231,225,0.3);
+      letter-spacing: 0.5px;
+      margin-top: 8px;
+    }
+    .btn-submit-mobile:hover { box-shadow: 0 6px 28px rgba(58,231,225,0.45); transform: translateY(-1px); }
+    .btn-submit-mobile:active { transform: translateY(0); }
+    .btn-submit-mobile:disabled {
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.4);
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    /* Divider */
+    .divider { display:flex; align-items:center; gap:10px; margin:20px 0; color:var(--dim); font-size:12px; }
+    .divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    /* Register link */
+    .register-link {
+      text-align: center;
+      font-size: 13px;
+      color: var(--dim);
+      margin-top: 4px;
+    }
+    .register-link a { color: var(--cyan); text-decoration: none; font-weight: 600; }
+
+    /* Loading state */
+    .loading-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 16px;
+      overflow: hidden;
+      display: none;
+    }
+    .loading-bar.show { display: block; }
+    .loading-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--blue));
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    /* Success state */
+    .success-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 0;
+      text-align: center;
+    }
+    .success-state.show { display: flex; animation: fadeUp 0.5s ease both; }
+    .success-icon-mobile {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 0 30px rgba(58,231,225,0.4);
+      animation: pop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .success-title { font-size: 20px; font-weight: 700; }
+    .success-desc  { font-size: 14px; color: var(--dim); line-height:1.5; }
+    .mirror-redirect-label {
+      font-size: 12px;
+      color: rgba(58,231,225,0.6);
+      letter-spacing: 1px;
+    }
+
+    @keyframes fadeDown { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeUp   { from{opacity:0;transform:translateY(14px)}  to{opacity:1;transform:translateY(0)} }
+    @keyframes pop { 0%{transform:scale(0);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+  </style>
+</head>
+<body>
+
+<!-- Logo -->
+<div class="mobile-logo">
+  <div class="mobile-logo-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M8 12l3 3 5-5"/>
+    </svg>
+  </div>
+  <span class="mobile-logo-name">SmartMirror</span>
+</div>
+
+<div class="mobile-card">
+
+  <!-- Form state -->
+  <div id="formState">
+    <div class="session-badge">
+      <div class="session-dot"></div>
+      Mirror Connected
+    </div>
+
+    <h1>Sign In</h1>
+    <p class="subtitle">Sign in on your phone — your Smart Mirror will unlock automatically.</p>
+    <div class="mirror-session" id="mirrorSession">Mirror session: loading...</div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="mobileEmail" placeholder="your@email.com"
+             autocomplete="email" inputmode="email"
+             onkeypress="if(event.key==='Enter') doMobileLogin()">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="mobilePass" placeholder="••••••••"
+             autocomplete="current-password"
+             onkeypress="if(event.key==='Enter') doMobileLogin()">
+    </div>
+
+    <button class="btn-submit-mobile" id="btnMobileLogin" onclick="doMobileLogin()">
+      Sign In & Unlock Mirror →
+    </button>
+
+    <div class="loading-bar" id="loadingBar">
+      <div class="loading-fill" id="loadingFill"></div>
+    </div>
+
+    <div class="divider">or</div>
+
+    <div class="register-link">
+      New here? <a href="smart-mirror-settings.html">Create an account</a>
+    </div>
+  </div>
+
+  <!-- Success state -->
+  <div class="success-state" id="successState">
+    <div class="success-icon-mobile">✓</div>
+    <div class="success-title" id="successNameMobile">Welcome!</div>
+    <div class="success-desc">Your Smart Mirror is now unlocking.<br>Look at the mirror for your dashboard.</div>
+    <div class="mirror-redirect-label">✦ Mirror is loading your profile ✦</div>
+  </div>
+
+</div>
+
+<script src="../shared/toast.js"></script>
+<script>
+const BACKEND_URL = "http://localhost:3000";
+
+// ── Read session ID from URL ──
+const urlParams  = new URLSearchParams(window.location.search);
+const SESSION_ID = urlParams.get("session") || "";
+
+document.getElementById("mirrorSession").textContent =
+  "Mirror session: " + (SESSION_ID || "unknown");
+
+// ════════════════════════════════════════
+// MOBILE LOGIN
+// ════════════════════════════════════════
+async function doMobileLogin() {
+  const email    = document.getElementById("mobileEmail").value.trim();
+  const password = document.getElementById("mobilePass").value;
+  const btn      = document.getElementById("btnMobileLogin");
+  const bar      = document.getElementById("loadingBar");
+  const fill     = document.getElementById("loadingFill");
+
+  if (!email || !password) {
+    toast.error("Please enter your email and password.");
+    return;
+  }
+  if (!SESSION_ID) {
+    toast.error("Invalid session. Please scan the QR code again.", "Invalid Session");
+    return;
+  }
+
+  btn.disabled = true;
+  bar.classList.add("show");
+
+  // Animate loading bar
+  let progress = 0;
+  const barTimer = setInterval(() => {
+    progress = Math.min(progress + 8, 85);
+    fill.style.width = progress + "%";
+  }, 120);
+
+  try {
+    // Step 1: Login
+    const loginRes  = await fetch(`${BACKEND_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const loginData = await loginRes.json();
+
+    if (!loginData.ok) {
+      throw new Error(loginData.error || "Login failed");
+    }
+
+    // Step 2: Notify mirror via backend (backend connects session → token)
+    // Replace with real endpoint when ready:
+    // await fetch(`${BACKEND_URL}/api/auth/qr-confirm`, {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({ session: SESSION_ID, token: loginData.token }),
+    // });
+
+    clearInterval(barTimer);
+    fill.style.width = "100%";
+
+    // Get user name
+    const name = loginData.name || email.split("@")[0];
+
+    setTimeout(() => {
+      bar.classList.remove("show");
+      showSuccess(name);
+    }, 300);
+
+  } catch (err) {
+    clearInterval(barTimer);
+    bar.classList.remove("show");
+    fill.style.width = "0%";
+    btn.disabled = false;
+    toast.error(err.message || "Login failed. Please try again.", "Error");
+  }
+}
+
+function showSuccess(name) {
+  document.getElementById("formState").style.display    = "none";
+  document.getElementById("successState").classList.add("show");
+  document.getElementById("successNameMobile").textContent = `Welcome, ${name}!`;
+}
+</script>
+</body>
+</html>

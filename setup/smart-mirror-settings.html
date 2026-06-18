@@ -263,32 +263,38 @@
     <div class="card">
       <h2 class="card-title" data-t="profileTitle">Your Profile</h2>
       <p class="card-desc" data-t="profileDesc">Personal information and fitness data</p>
-      <div class="profile-avatar">JD<div class="avatar-edit">📷</div></div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" data-t="profileFirstName">First Name</label>
-          <input type="text" class="form-input" id="p_first" value="John">
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-t="profileLastName">Last Name</label>
-          <input type="text" class="form-input" id="p_last" value="Doe">
-        </div>
+      
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px;">
+        <div class="profile-avatar" id="avatarClickZone" style="cursor: pointer; position: relative;">
+          <div id="avatarContent"></div>
+          <div class="avatar-edit">📷</div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" data-t="profileAge">Age</label>
-          <input type="number" class="form-input" id="p_age" value="28">
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-t="profileGender">Gender</label>
-          <select class="form-select" id="p_gender">
-            <option value="male"   data-t="profileGenderMale">Male</option>
-            <option value="female" data-t="profileGenderFemale">Female</option>
-            <option value="other"  data-t="profileGenderOther">Other</option>
-            <option value="prefer" data-t="profileGenderPrefer">Prefer not to say</option>
-          </select>
-        </div>
+      
+      <button type="button" id="btnCaptureCamera" class="btn" style="padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.08); border: 1px solid var(--border);">
+        📸 Take Live Photo
+      </button>
+    </div>
+
+    <video id="webcamVideo" autoplay playsinline style="display: none; width: 150px; height: 150px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; border: 2px solid var(--blue);"></video>
+    <canvas id="webcamCanvas" style="display: none;"></canvas>
+    
+    <input type="file" id="p_avatar" accept="image/*" style="display: none;" />
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" data-t="profileAge">Age</label>
+        <input type="number" class="form-input" id="p_age" value="28">
       </div>
+      <div class="form-group">
+        <label class="form-label" data-t="profileGender">Gender</label>
+        <select class="form-select" id="p_gender">
+          <option value="male"   data-t="profileGenderMale">Male</option>
+          <option value="female" data-t="profileGenderFemale">Female</option>
+          <option value="other"  data-t="profileGenderOther">Other</option>
+          <option value="prefer" data-t="profileGenderPrefer">Prefer not to say</option>
+        </select>
+      </div>
+    </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" data-t="profileHeight">Height (cm)</label>
@@ -334,5 +340,6 @@
 </form>
 
 <script src="js/script.js"></script>
+<script src="../shared/toast.js"></script>
 </body>
 </html>

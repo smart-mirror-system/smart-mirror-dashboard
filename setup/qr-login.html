@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Mirror — Welcome</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    background: #050a12;
+    font-family: 'Rajdhani', sans-serif;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 100vh; position: relative;
+  }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse 65% 55% at 50% 60%, rgba(107,163,255,.07), transparent 65%),
+      radial-gradient(ellipse 40% 40% at 20% 20%, rgba(58,231,225,.05), transparent 55%),
+      radial-gradient(ellipse 35% 35% at 80% 80%, rgba(95,255,195,.04), transparent 55%);
+    pointer-events:none;
+  }
+  body::after {
+    content:''; position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(107,163,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(107,163,255,.04) 1px, transparent 1px);
+    background-size: 60px 60px; pointer-events:none;
+  }
+  .scanlines {
+    position:fixed; inset:0;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px);
+    pointer-events:none; z-index:50;
+  }
+  .qr-layout {
+    position: relative; z-index: 10;
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    align-items: center; gap: 0 64px;
+    width: 100%; max-width: 1100px; padding: 0 48px;
+  }
+  .qr-left { display:flex; flex-direction:column; gap:28px; }
+  .brand { display:flex; align-items:center; gap:14px; animation:fadeInLeft .8s ease both; }
+  .brand-icon {
+    width:50px; height:50px;
+    background:linear-gradient(135deg,#6ba3ff,#3ae7e1); border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 24px rgba(107,163,255,.45); flex-shrink:0;
+  }
+  .brand-icon svg { width:26px; height:26px; }
+  .brand-name {
+    font-family:'Orbitron',monospace; font-size:clamp(14px,1.5vw,20px);
+    font-weight:700; letter-spacing:4px; color:rgba(255,255,255,.9); text-transform:uppercase;
+  }
+  .qr-headline { animation:fadeInLeft .8s .1s ease both; }
+  .qr-headline h1 {
+    font-family:'Orbitron',monospace; font-size:clamp(28px,3.5vw,48px);
+    font-weight:900; color:rgba(255,255,255,.92); line-height:1.15; letter-spacing:2px;
+  }
+  .qr-headline h1 span { color:#3ae7e1; }
+  .qr-headline p { margin-top:14px; font-size:clamp(14px,1.4vw,18px); color:rgba(255,255,255,.45); line-height:1.6; max-width:380px; }
+  .qr-steps { display:flex; flex-direction:column; gap:14px; animation:fadeInLeft .8s .2s ease both; }
+  .qr-step { display:flex; align-items:flex-start; gap:14px; }
+  .qr-step-num {
+    width:28px; height:28px; border-radius:50%;
+    background:rgba(58,231,225,.12); border:1px solid rgba(58,231,225,.3);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Orbitron',monospace; font-size:11px; font-weight:700; color:#3ae7e1; flex-shrink:0;
+  }
+  .qr-step-text { font-size:clamp(13px,1.2vw,15px); color:rgba(255,255,255,.6); line-height:1.5; }
+  .qr-step-text strong { color:rgba(255,255,255,.85); }
+  .qr-keyboard-btn {
+    display:inline-flex; align-items:center; gap:10px; padding:12px 22px;
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:12px;
+    font-family:'Orbitron',monospace; font-size:10px; font-weight:700; letter-spacing:2px;
+    color:rgba(255,255,255,.6); text-decoration:none; text-transform:uppercase;
+    transition:all .3s; animation:fadeInLeft .8s .3s ease both; cursor:pointer;
+  }
+  .qr-keyboard-btn:hover { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.25); color:rgba(255,255,255,.9); transform:translateY(-1px); }
+  .qr-center { display:flex; flex-direction:column; align-items:center; gap:20px; animation:fadeIn .8s .15s ease both; }
+  .qr-frame-outer {
+    position:relative; padding:3px;
+    background:linear-gradient(135deg,rgba(58,231,225,.5),rgba(107,163,255,.5),rgba(58,231,225,.5));
+    border-radius:22px; box-shadow:0 0 50px rgba(58,231,225,.15);
+  }
+  .qr-frame-inner { background:rgba(5,10,18,.8); border-radius:20px; padding:18px; position:relative; overflow:hidden; }
+  .qr-corner { position:absolute; width:20px; height:20px; border-color:#3ae7e1; border-style:solid; border-width:0; }
+  .qr-corner.tl { top:8px; left:8px; border-top-width:2.5px; border-left-width:2.5px; border-radius:4px 0 0 0; }
+  .qr-corner.tr { top:8px; right:8px; border-top-width:2.5px; border-right-width:2.5px; border-radius:0 4px 0 0; }
+  .qr-corner.bl { bottom:8px; left:8px; border-bottom-width:2.5px; border-left-width:2.5px; border-radius:0 0 0 4px; }
+  .qr-corner.br { bottom:8px; right:8px; border-bottom-width:2.5px; border-right-width:2.5px; border-radius:0 0 4px 0; }
+  .qr-scan-line {
+    position:absolute; left:18px; right:18px; height:2px;
+    background:linear-gradient(90deg,transparent,rgba(58,231,225,.9),transparent);
+    box-shadow:0 0 8px rgba(58,231,225,.8); animation:qrScan 3s ease-in-out infinite; pointer-events:none;
+  }
+  @keyframes qrScan { 0%{top:18px;opacity:0} 8%{opacity:1} 92%{opacity:1} 100%{top:calc(100% - 18px);opacity:0} }
+  #qrCanvas { display:block; border-radius:8px; background:#fff; }
+  .qr-label { font-family:'Orbitron',monospace; font-size:9px; letter-spacing:3px; color:rgba(255,255,255,.4); text-transform:uppercase; text-align:center; }
+  .qr-session { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:2px; color:rgba(255,255,255,.2); text-align:center; }
+  .qr-status-row { display:flex; align-items:center; gap:8px; font-family:'Orbitron',monospace; font-size:9px; letter-spacing:3px; color:rgba(255,255,255,.4); text-transform:uppercase; }
+  .qr-status-dot { width:6px; height:6px; border-radius:50%; background:#3ae7e1; box-shadow:0 0 8px #3ae7e1; animation:waitPulse 1.4s ease-in-out infinite; }
+  .qr-status-dot.connected { background:#5fffc3; box-shadow:0 0 8px #5fffc3; animation:none; }
+  @keyframes waitPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.25;transform:scale(.65)} }
+  .qr-right { display:flex; flex-direction:column; gap:18px; animation:fadeInRight .8s .2s ease both; }
+  .qr-stat-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:16px; padding:16px 20px; display:flex; flex-direction:column; gap:4px; }
+  .qr-stat-label { font-family:'Orbitron',monospace; font-size:8px; letter-spacing:2.5px; color:rgba(255,255,255,.35); text-transform:uppercase; }
+  .qr-stat-value { font-family:'Orbitron',monospace; font-size:clamp(22px,2.5vw,32px); font-weight:900; color:rgba(255,255,255,.85); letter-spacing:-1px; }
+  .qr-stat-value.red  { color:#ff4d6a; text-shadow:0 0 18px rgba(255,77,106,.4); }
+  .qr-stat-value.cyan { color:#3ae7e1; text-shadow:0 0 18px rgba(58,231,225,.4); }
+  .qr-stat-sub { font-size:11px; color:rgba(255,255,255,.3); }
+  .qr-success {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:200;
+    flex-direction:column; align-items:center; justify-content:center; gap:22px;
+  }
+  .qr-success.show { display:flex; animation:fadeIn .5s ease both; }
+  .qr-success-icon {
+    width:80px; height:80px; border-radius:50%;
+    background:linear-gradient(135deg,#3ae7e1,#6ba3ff);
+    display:flex; align-items:center; justify-content:center;
+    font-size:36px; box-shadow:0 0 50px rgba(58,231,225,.5);
+    animation:pop .6s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .qr-success-name { font-family:'Orbitron',monospace; font-size:clamp(22px,3vw,36px); font-weight:900; color:#fff; letter-spacing:3px; text-align:center; }
+  .qr-success-sub { font-family:'Rajdhani',sans-serif; font-size:16px; color:rgba(255,255,255,.45); letter-spacing:2px; }
+  .qr-redirect-bar { width:200px; height:3px; background:rgba(255,255,255,.1); border-radius:2px; overflow:hidden; }
+  .qr-redirect-fill { height:100%; background:linear-gradient(90deg,#3ae7e1,#6ba3ff); border-radius:2px; animation:pFill 2.5s linear forwards; }
+  @media(max-width:900px) {
+    .qr-layout { grid-template-columns:1fr; justify-items:center; gap:36px; padding:32px 24px; overflow-y:auto; }
+    .qr-left, .qr-right { max-width:420px; width:100%; }
+    .qr-right { flex-direction:row; flex-wrap:wrap; justify-content:center; }
+    .qr-stat-card { min-width:140px; flex:1; }
+    body { justify-content:flex-start; padding-top:40px; }
+  }
+  @media(max-width:540px) {
+    .qr-layout { padding:20px 16px; gap:24px; }
+    .brand-name { font-size:13px; }
+    .qr-right { display:none; }
+  }
+  @keyframes fadeIn      { from{opacity:0}              to{opacity:1} }
+  @keyframes fadeInLeft  { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:none} }
+  @keyframes fadeInRight { from{opacity:0;transform:translateX(20px)}  to{opacity:1;transform:none} }
+  @keyframes pop  { 0%{transform:scale(0);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+  @keyframes pFill { from{width:0%} to{width:100%} }
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+
+<div class="qr-layout">
+  <div class="qr-left">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-5"/>
+        </svg>
+      </div>
+      <span class="brand-name">SmartMirror</span>
+    </div>
+    <div class="qr-headline">
+      <h1>Your <span>Fitness</span><br>Mirror is Ready</h1>
+      <p>No keyboard needed — scan the QR code with your phone to sign in or create an account.</p>
+    </div>
+    <div class="qr-steps">
+      <div class="qr-step"><div class="qr-step-num">1</div><div class="qr-step-text"><strong>Open your phone camera</strong><br>Point it at the QR code</div></div>
+      <div class="qr-step"><div class="qr-step-num">2</div><div class="qr-step-text"><strong>Sign in or create an account</strong><br>Tap the link on your screen</div></div>
+      <div class="qr-step"><div class="qr-step-num">3</div><div class="qr-step-text"><strong>Mirror unlocks automatically</strong><br>Your dashboard appears instantly</div></div>
+    </div>
+    <a class="qr-keyboard-btn" href="../setup/sign-in.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M6 16h12"/>
+      </svg>
+      Use Keyboard Instead
+    </a>
+  </div>
+
+  <div class="qr-center">
+    <div class="qr-frame-outer">
+      <div class="qr-frame-inner">
+        <div class="qr-corner tl"></div><div class="qr-corner tr"></div>
+        <div class="qr-corner bl"></div><div class="qr-corner br"></div>
+        <div class="qr-scan-line"></div>
+        <div id="qrCanvas" style="width:200px;height:200px;"></div>
+      </div>
+    </div>
+    <div class="qr-label">Scan with phone camera</div>
+    <div class="qr-session" id="sessionDisplay">Generating session...</div>
+    <div class="qr-status-row">
+      <div class="qr-status-dot" id="statusDot"></div>
+      <span id="statusText">Waiting for sign in</span>
+    </div>
+  </div>
+
+  <div class="qr-right">
+    <div class="qr-stat-card">
+      <div class="qr-stat-label">Time</div>
+      <div class="qr-stat-value cyan" id="previewClock">--:--:--</div>
+      <div class="qr-stat-sub">Current time</div>
+    </div>
+    <div class="qr-stat-card">
+      <div class="qr-stat-label">Status</div>
+      <div class="qr-stat-value cyan" id="previewStatus" style="font-size:16px;">READY</div>
+      <div class="qr-stat-sub">Awaiting sign in</div>
+    </div>
+    <div class="qr-stat-card">
+      <div class="qr-stat-label">Session</div>
+      <div class="qr-stat-value" style="font-size:14px;" id="previewSession">--</div>
+      <div class="qr-stat-sub">Mirror ID</div>
+    </div>
+  </div>
+</div>
+
+<div class="qr-success" id="qrSuccess">
+  <div class="qr-success-icon">✓</div>
+  <div class="qr-success-name" id="successName">Welcome!</div>
+  <div class="qr-success-sub">Loading your dashboard...</div>
+  <div class="qr-redirect-bar"><div class="qr-redirect-fill"></div></div>
+</div>
+
+<!-- QR library from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- Socket.IO -->
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="js/env-config.js"></script>
+<script>
+const BACKEND_URL = window.env?.BACKEND_URL || "http://localhost:3000";
+const SITE_ORIGIN = window.location.origin;
+
+// ── Clock ──
+setInterval(() => {
+  const el = document.getElementById("previewClock");
+  if (el) el.textContent = new Date().toTimeString().slice(0, 8);
+}, 1000);
+
+// ── Generate session ID ──
+function generateSession() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(12)))
+    .map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
+const SESSION_ID = generateSession();
+document.getElementById("sessionDisplay").textContent = "Session: " + SESSION_ID.slice(0, 8) + "...";
+document.getElementById("previewSession").textContent  = SESSION_ID.slice(0, 6);
+
+// ── Build mobile URL — points to sign-in.html with session param ──
+const mobileURL = `${SITE_ORIGIN}/smart-mirror-dashboard/setup/sign-in.html?session=${SESSION_ID}`;
+
+// ── Render QR code ──
+function renderQR() {
+  const el = document.getElementById("qrCanvas");
+  el.innerHTML = "";
+  try {
+    new QRCode(el, {
+      text:         mobileURL,
+      width:        200,
+      height:       200,
+      colorDark:    "#000000",
+      colorLight:   "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H,
+    });
+    console.log("QR rendered:", mobileURL);
+  } catch (err) {
+    console.error("QR error:", err);
+    el.innerHTML = `<p style="color:#3ae7e1;font-size:10px;padding:8px;text-align:center;word-break:break-all;">Visit:<br>${mobileURL}</p>`;
+  }
+}
+renderQR();
+
+// ════════════════════════════════════════
+// SOCKET.IO — Primary (no polling)
+// The mirror connects as a DEVICE and joins the QR room.
+// When mobile confirms login, backend emits 'qr:authenticated' instantly.
+// ════════════════════════════════════════
+
+// DEVICE token for QR page (the mirror itself doesn't need a user token here)
+// Uses a special device token from env, or connects unauthenticated
+// Backend must allow unauthenticated sockets to join QR rooms OR
+// use a pre-shared device token
+const DEVICE_TOKEN = window.env?.DEVICE_TOKEN || null;
+
+let socket = null;
+
+function connectSocket() {
+  const socketOpts = DEVICE_TOKEN
+    ? { auth: { token: DEVICE_TOKEN }, transports: ["websocket"] }
+    : { transports: ["websocket"] };
+
+  socket = io(BACKEND_URL, socketOpts);
+
+  socket.on("connect", () => {
+    console.log("QR socket connected:", socket.id);
+    // Join the QR session room so we receive auth event
+    socket.emit("qr:join", SESSION_ID);
+    updateStatus("connected", "Waiting for sign in");
+  });
+
+  socket.on("connect_error", (err) => {
+    console.warn("QR socket error:", err?.message, "— falling back to polling");
+    updateStatus("waiting", "Waiting for sign in");
+    startPollingFallback();
+  });
+
+  // ── PRIMARY: Mirror receives this when mobile logs in ──
+  socket.on("qr:authenticated", (data) => {
+    console.log("QR authenticated via socket:", data);
+    handleAuthenticated(data.token, data.name);
+  });
+
+  socket.on("disconnect", () => {
+    updateStatus("waiting", "Reconnecting...");
+  });
+}
+
+// ════════════════════════════════════════
+// POLLING FALLBACK (only if socket fails)
+// ════════════════════════════════════════
+let pollInterval = null;
+
+function startPollingFallback() {
+  if (pollInterval) return; // already polling
+  pollInterval = setInterval(async () => {
+    try {
+      const res  = await fetch(`${BACKEND_URL}/api/auth/qr-status?session=${SESSION_ID}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.ok && data.token) {
+        clearInterval(pollInterval);
+        handleAuthenticated(data.token, data.name);
+      }
+    } catch { /* silent */ }
+  }, 2500);
+}
+
+// ════════════════════════════════════════
+// SHARED: show success + redirect
+// ════════════════════════════════════════
+function handleAuthenticated(token, name) {
+  localStorage.setItem("token", token);
+  updateStatus("connected", "Authenticated!");
+  document.getElementById("previewStatus").textContent = "UNLOCKED";
+  document.getElementById("successName").textContent   = `Welcome, ${name || "User"}!`;
+  document.getElementById("qrSuccess").classList.add("show");
+  setTimeout(() => { window.location.href = "../dashboard/index.html"; }, 2600);
+}
+
+function updateStatus(state, text) {
+  const dot = document.getElementById("statusDot");
+  const txt = document.getElementById("statusText");
+  if (dot) dot.className = "qr-status-dot" + (state === "connected" ? " connected" : "");
+  if (txt) txt.textContent = text;
+}
+
+// ── Connect ──
+connectSocket();
+
+// ── Refresh every 5 min (QR sessions expire) ──
+setTimeout(() => window.location.reload(), 5 * 60 * 1000);
+</script>
+</body>
+</html>

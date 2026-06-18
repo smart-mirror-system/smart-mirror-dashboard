@@ -3,333 +3,1129 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Mirror — Configuration</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
+<title>Smart Mirror — My Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/navbar.css">
 <link rel="stylesheet" href="css/settings-style.css">
+<style>
+  /* ── Navbar offset for this page ── */
+  body { padding-top: 64px; }
+
+  /* ── Section tabs ── */
+  .profile-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .profile-tab {
+    padding: 9px 20px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-input);
+    color: var(--text-d);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.3px;
+  }
+  .profile-tab:hover { border-color: var(--border-focus); color: var(--text-m); }
+  .profile-tab.active {
+    background: linear-gradient(135deg, var(--blue), var(--green));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(107,163,255,0.3);
+  }
+
+  /* ── Tab sections ── */
+  .tab-section { display: none; }
+  .tab-section.active { display: block; animation: fadeIn 0.3s ease both; }
+
+  /* ── Avatar zone ── */
+  .avatar-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding: 28px;
+    background: var(--bg-input);
+    border: 1px dashed var(--border);
+    border-radius: 20px;
+  }
+  .avatar-circle {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--green));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 44px;
+    font-weight: 800;
+    color: #fff;
+    box-shadow: 0 10px 36px rgba(107,163,255,0.35);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+  .avatar-circle:hover { transform: scale(1.05); }
+  .avatar-circle img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    position: absolute; inset: 0;
+  }
+  .avatar-circle-edit {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.55);
+    text-align: center;
+    font-size: 11px;
+    padding: 6px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    color: #fff;
+  }
+  .avatar-circle:hover .avatar-circle-edit { opacity: 1; }
+  .avatar-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .avatar-hint {
+    font-size: 12px;
+    color: var(--text-d);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* ── Face ID section ── */
+  .face-id-zone {
+    border: 1px solid rgba(107,163,255,0.25);
+    background: rgba(107,163,255,0.05);
+    border-radius: 16px;
+    padding: 22px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 22px;
+  }
+  .face-id-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(107,163,255,0.2), rgba(95,255,195,0.2));
+    border: 1px solid rgba(107,163,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .face-id-info { flex: 1; }
+  .face-id-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700;
+    color: var(--text-p);
+    margin-bottom: 3px;
+  }
+  .face-id-desc { font-size: 13px; color: var(--text-d); line-height: 1.5; }
+  .face-id-status {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-top: 6px;
+    display: inline-block;
+  }
+  .face-id-status.registered {
+    background: rgba(95,255,195,0.15);
+    color: #5fffc3;
+    border: 1px solid rgba(95,255,195,0.3);
+  }
+  .face-id-status.not-registered {
+    background: rgba(255,210,80,0.12);
+    color: #ffd250;
+    border: 1px solid rgba(255,210,80,0.3);
+  }
+
+  /* Webcam preview */
+  #webcamVideo {
+    width: 100%; max-width: 300px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: none;
+    margin: 12px auto 0;
+  }
+  #webcamCanvas { display: none; }
+
+  /* ── Password strength indicator ── */
+  .pass-strength {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--bg-toggle);
+    margin-top: 8px;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .pass-strength-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: all 0.4s;
+    width: 0%;
+  }
+  .pass-strength-label {
+    font-size: 11px;
+    margin-top: 4px;
+    transition: color 0.3s;
+  }
+
+  /* ── Settings toggles ── */
+  .settings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ── Save feedback ── */
+  .save-bar {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,16,22,0.92);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    z-index: 900;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .save-bar.show {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(-50%) translateY(0);
+  }
+  .save-bar span { color: rgba(255,255,255,0.8); font-size: 14px; }
+
+  @media (max-width: 600px) {
+    .face-id-zone { flex-direction: column; align-items: flex-start; }
+    .avatar-zone { padding: 18px; }
+    .save-bar { left: 16px; right: 16px; transform: none; }
+    .save-bar.show { transform: none; }
+  }
+  @keyframes scanLine {
+    0%  { top: 0%;   opacity: 0.7; }
+    50% { top: 100%; opacity: 1;   }
+    100%{ top: 0%;   opacity: 0.7; }
+  }
+</style>
 </head>
 <body>
 
-<!-- Theme Toggle -->
-<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
-  <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="5"/>
-    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-  </svg>
-  <span id="themeLabel">Light Mode</span>
-</button>
+<!-- ═══ NAVBAR ═══ -->
+<nav class="sm-navbar" data-context="setup" data-dash-root="../dashboard/" data-setup-root="./"></nav>
 
-<div class="config-container">
+<div class="config-container" style="padding-top: 32px;">
 
   <!-- Header -->
-  <div class="config-header">
-    <div class="header-logo">
-      <svg class="logo-icon" viewBox="0 0 32 32" fill="none">
-        <circle cx="16" cy="16" r="14" stroke="white" stroke-width="2"/>
-        <path d="M12 16L15 19L20 14" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <h1 class="header-title" data-t="headerTitle">Profile</h1>
-    <p class="header-subtitle" data-t="headerSubtitle">Configure your personalized Profile</p>
+  <div class="config-header" style="margin-bottom: 24px;">
+    <h1 class="header-title">My Profile</h1>
+    <p class="header-subtitle">Manage your account, appearance, and training preferences</p>
   </div>
 
-  <!-- Step Progress -->
-  <div class="step-progress" id="stepProgress">
-    <div class="step-item active" id="si-0"><div class="step-dot active" id="sd-0">1</div><div class="step-label" data-t="tabAccount">Account</div></div>
-    <div class="step-line" id="sl-0"></div>
-    <div class="step-item" id="si-1"><div class="step-dot" id="sd-1">2</div><div class="step-label" data-t="tabLanguage">Language</div></div>
-    <div class="step-line" id="sl-1"></div>
-    <div class="step-item" id="si-2"><div class="step-dot" id="sd-2">3</div><div class="step-label" data-t="tabTraining">Training</div></div>
-    <div class="step-line" id="sl-2"></div>
-    <div class="step-item" id="si-3"><div class="step-dot" id="sd-3">4</div><div class="step-label" data-t="tabPreferences">Preferences</div></div>
-    <div class="step-line" id="sl-3"></div>
-    <div class="step-item" id="si-4"><div class="step-dot" id="sd-4">5</div><div class="step-label" data-t="tabProfile">Profile</div></div>
+  <!-- Tabs -->
+  <div class="profile-tabs">
+    <button class="profile-tab active" onclick="switchTab('account')">👤 Account</button>
+    <button class="profile-tab" onclick="switchTab('body')">📏 Body Stats</button>
+    <button class="profile-tab" onclick="switchTab('training')">🏋️ Training</button>
+    <button class="profile-tab" onclick="switchTab('display')">🖥️ Display</button>
+    <button class="profile-tab" onclick="switchTab('security')">🔒 Security</button>
   </div>
 
-  <!-- ═══ STEP 1: ACCOUNT ═══ -->
-  <div class="step-panel active" id="step-0">
+  <!-- ═══ TAB: ACCOUNT ═══ -->
+  <div class="tab-section active" id="tab-account">
     <div class="card">
-      <h2 class="card-title" id="authTitle" data-t="authTitleRegister">Edit Your Account</h2>
-      <p class="card-desc" data-t="authDesc">Get started with your personalized fitness journey</p>
-      <div class="success-msg" id="successMsg">
-        <span>✓</span><span data-t="successMsg">Account created successfully!</span>
+      <h2 class="card-title">Account & Avatar</h2>
+      <p class="card-desc">Update your name and profile photo. Changes are saved to your account.</p>
+
+      <!-- Avatar -->
+      <div class="avatar-zone">
+        <div class="avatar-circle" id="avatarCircle" onclick="document.getElementById('avatarFileInput').click()">
+          <span id="avatarLetter">?</span>
+          <div class="avatar-circle-edit">✏️ Change</div>
+        </div>
+        <div class="avatar-actions">
+          <button class="btn" onclick="document.getElementById('avatarFileInput').click()">📁 Upload Photo</button>
+          <button class="btn" id="btnFaceCapture">📸 Take Photo</button>
+          <button class="btn" id="btnRemoveAvatar" style="color:var(--red);border-color:rgba(255,107,107,0.3);">✕ Remove</button>
+        </div>
+        <video id="webcamVideo" autoplay muted playsinline></video>
+        <canvas id="webcamCanvas"></canvas>
+        <input type="file" id="avatarFileInput" accept="image/*" style="display:none">
+        <p class="avatar-hint">Click the photo or use the buttons above.<br>Max 5MB · JPG, PNG, WebP</p>
       </div>
-      <div class="form-group" id="nameField">
-        <label class="form-label" data-t="authNameLabel">Full Name</label>
-        <input type="text" class="form-input" id="fullName" data-ph="authNamePlaceholder" placeholder="John Doe">
+
+      <!-- Face ID -->
+      <div class="face-id-zone">
+        <div class="face-id-icon">🫦</div>
+        <div class="face-id-info">
+          <div class="face-id-title">Face ID Login</div>
+          <div class="face-id-desc">Register your face to enable quick sign-in without a password on supported devices.</div>
+          <span class="face-id-status not-registered" id="faceIdStatus">Not Registered</span>
+        </div>
+        <button class="btn btn-primary" id="btnRegisterFace" style="white-space:nowrap;flex-shrink:0;">Register Face</button>
+      </div>
+
+      <!-- Name fields -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input type="text" class="form-input" id="profileFirstName" placeholder="John">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input type="text" class="form-input" id="profileLastName" placeholder="Doe">
+        </div>
       </div>
       <div class="form-group">
-        <label class="form-label" data-t="authEmailLabel">Email Address</label>
-        <input type="email" class="form-input" id="emailInput" data-ph="authEmailPlaceholder" placeholder="john@example.com">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="profileEmail" placeholder="john@example.com" readonly
+               style="opacity:0.6;cursor:not-allowed;" title="Email cannot be changed">
+        <p style="font-size:11px;color:var(--text-d);margin-top:4px;">Email address cannot be changed. Contact support if needed.</p>
       </div>
-      <div class="form-group">
-        <label class="form-label" data-t="authPasswordLabel">Password</label>
-        <input type="password" class="form-input" id="passInput" data-ph="authPasswordPlaceholder" placeholder="••••••••">
-      </div>
-      <div class="form-group" id="confirmField">
-        <label class="form-label" data-t="authConfirmLabel">Confirm Password</label>
-        <input type="password" class="form-input" id="confirmInput" data-ph="authPasswordPlaceholder" placeholder="••••••••">
-      </div>
-     
-    </div>
-    <div class="wizard-nav">
-      <div class="nav-left"></div>
-      <span class="step-counter" data-step="1"></span>
-      <div class="nav-right">
-        <button class="btn btn-primary" onclick="goNext()" data-t="btnNext">Next →</button>
-      </div>
+
+      <button class="btn btn-primary" onclick="saveAccountInfo()">Save Account Changes</button>
     </div>
   </div>
 
-  <!-- ═══ STEP 2: LANGUAGE ═══ -->
-  <div class="step-panel" id="step-1">
+  <!-- ═══ TAB: BODY STATS ═══ -->
+  <div class="tab-section" id="tab-body">
     <div class="card">
-      <h2 class="card-title" data-t="langTitle">Language Preferences</h2>
-      <p class="card-desc" data-t="langDesc">Choose your preferred language and region settings</p>
+      <h2 class="card-title">Body Statistics</h2>
+      <p class="card-desc">Your physical stats help us personalize your workout intensity and calorie calculations.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Age</label>
+          <input type="number" class="form-input" id="profileAge" placeholder="28" min="10" max="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gender</label>
+          <select class="form-select" id="profileGender">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+            <option value="prefer_not">Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Height (cm)</label>
+          <input type="number" class="form-input" id="profileHeight" placeholder="175" min="100" max="250">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Weight (kg)</label>
+          <input type="number" class="form-input" id="profileWeight" placeholder="70" min="30" max="300">
+        </div>
+      </div>
       <div class="form-group">
-        <label class="form-label" data-t="langDisplayLabel">Display Language</label>
-        <select class="form-select" id="langSelect" onchange="onLangChange(this.value)">
+        <label class="form-label">Primary Fitness Goal</label>
+        <select class="form-select" id="profileGoal">
+          <option value="lose-weight">Lose Weight</option>
+          <option value="build-muscle">Build Muscle</option>
+          <option value="improve-endurance">Improve Endurance</option>
+          <option value="increase-flexibility">Increase Flexibility</option>
+          <option value="general-fitness">General Fitness</option>
+          <option value="athletic-performance">Athletic Performance</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" onclick="saveBodyStats()">Save Body Stats</button>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: TRAINING ═══ -->
+  <div class="tab-section" id="tab-training">
+    <div class="card">
+      <h2 class="card-title">Training Preferences</h2>
+      <p class="card-desc">Configure your workout style and experience level.</p>
+
+      <div class="form-group">
+        <label class="form-label">Training Type</label>
+        <div class="option-grid" id="trainingTypeGrid">
+          <div class="option-card" data-group="training" data-value="strength" onclick="selectOption(this)">
+            <div class="option-icon">💪</div>
+            <div class="option-title">Strength</div>
+            <div class="option-desc">Build muscle and power</div>
+          </div>
+          <div class="option-card" data-group="training" data-value="cardio" onclick="selectOption(this)">
+            <div class="option-icon">🏃</div>
+            <div class="option-title">Cardio</div>
+            <div class="option-desc">Improve endurance</div>
+          </div>
+          <div class="option-card" data-group="training" data-value="hiit" onclick="selectOption(this)">
+            <div class="option-icon">⚡</div>
+            <div class="option-title">HIIT</div>
+            <div class="option-desc">High-intensity intervals</div>
+          </div>
+          <div class="option-card" data-group="training" data-value="mixed" onclick="selectOption(this)">
+            <div class="option-icon">🔄</div>
+            <div class="option-title">Mixed</div>
+            <div class="option-desc">Balanced approach</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Fitness Level</label>
+        <div class="option-grid">
+          <div class="option-card" data-group="level" data-value="beginner" onclick="selectOption(this)">
+            <div class="option-icon">🌱</div>
+            <div class="option-title">Beginner</div>
+            <div class="option-desc">Starting my journey</div>
+          </div>
+          <div class="option-card" data-group="level" data-value="intermediate" onclick="selectOption(this)">
+            <div class="option-icon">🔥</div>
+            <div class="option-title">Intermediate</div>
+            <div class="option-desc">Regular workouts</div>
+          </div>
+          <div class="option-card" data-group="level" data-value="advanced" onclick="selectOption(this)">
+            <div class="option-icon">🏆</div>
+            <div class="option-title">Advanced</div>
+            <div class="option-desc">Experienced athlete</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="saveTrainingPrefs()">Save Training Preferences</button>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: DISPLAY ═══ -->
+  <div class="tab-section" id="tab-display">
+    <div class="card">
+      <h2 class="card-title">Mirror Display Settings</h2>
+      <p class="card-desc">Control which panels and widgets are shown on your dashboard.</p>
+
+      <div class="settings-grid">
+        <div class="toggle-group">
+          <div>
+            <div class="toggle-label">Heart Rate Monitor</div>
+            <div class="toggle-desc">Show real-time heart rate panel</div>
+          </div>
+          <div class="toggle-switch active" id="tog-heartrate" onclick="toggleSetting(this, 'show_heartrate')"></div>
+        </div>
+        <div class="toggle-group">
+          <div>
+            <div class="toggle-label">Calorie Counter</div>
+            <div class="toggle-desc">Track calories burned during workout</div>
+          </div>
+          <div class="toggle-switch active" id="tog-calories" onclick="toggleSetting(this, 'show_calories')"></div>
+        </div>
+        <div class="toggle-group">
+          <div>
+            <div class="toggle-label">Skeleton Tracking Overlay</div>
+            <div class="toggle-desc">Real-time form analysis with skeleton</div>
+          </div>
+          <div class="toggle-switch active" id="tog-skeleton" onclick="toggleSetting(this, 'show_skeleton')"></div>
+        </div>
+        <div class="toggle-group">
+          <div>
+            <div class="toggle-label">Rep Counter</div>
+            <div class="toggle-desc">Automatic repetition counting</div>
+          </div>
+          <div class="toggle-switch active" id="tog-reps" onclick="toggleSetting(this, 'show_reps')"></div>
+        </div>
+        <div class="toggle-group">
+          <div>
+            <div class="toggle-label">Workout Timer</div>
+            <div class="toggle-desc">Show elapsed workout time</div>
+          </div>
+          <div class="toggle-switch active" id="tog-timer" onclick="toggleSetting(this, 'show_timer')"></div>
+        </div>
+        <div class="toggle-group">
+          <div>
+            <div class="toggle-label">Voice Coaching</div>
+            <div class="toggle-desc">Audio guidance during workouts</div>
+          </div>
+          <div class="toggle-switch" id="tog-voice" onclick="toggleSetting(this, 'voice_coaching')"></div>
+        </div>
+        <div class="toggle-group">
+          <div>
+            <div class="toggle-label">Form Correction Alerts</div>
+            <div class="toggle-desc">Audio alerts for improper form</div>
+          </div>
+          <div class="toggle-switch active" id="tog-alerts" onclick="toggleSetting(this, 'form_alerts')"></div>
+        </div>
+        <div class="toggle-group">
+          <div>
+            <div class="toggle-label">Exercise Demo Video</div>
+            <div class="toggle-desc">Show exercise demo when workout is active</div>
+          </div>
+          <div class="toggle-switch active" id="tog-video" onclick="toggleSetting(this, 'show_video')"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <label class="form-label">Display Language</label>
+        <select class="form-select" id="displayLang" onchange="onLangChange(this.value)">
           <option value="en">English</option>
           <option value="ar">العربية (Arabic)</option>
-          <option value="es">Español (Spanish)</option>
-          <option value="fr">Français (French)</option>
-          <option value="de">Deutsch (German)</option>
         </select>
+      </div>
+
+      <button class="btn btn-primary" style="margin-top:22px;" onclick="saveDisplaySettings()">Save Display Settings</button>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: SECURITY ═══ -->
+  <div class="tab-section" id="tab-security">
+    <div class="card">
+      <h2 class="card-title">Change Password</h2>
+      <p class="card-desc">Choose a strong password to keep your account secure.</p>
+
+      <div class="form-group">
+        <label class="form-label">Current Password</label>
+        <input type="password" class="form-input" id="currentPass" placeholder="••••••••">
       </div>
       <div class="form-group">
-        <label class="form-label" data-t="langVoiceLabel">Voice Feedback Language</label>
-        <select class="form-select">
-          <option value="en-US">English (US)</option>
-          <option value="en-GB">English (UK)</option>
-          <option value="ar-SA">Arabic</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" data-t="langUnitsLabel">Units</label>
-          <select class="form-select">
-            <option value="metric"   data-t="langUnitsMetric">Metric (kg, cm)</option>
-            <option value="imperial" data-t="langUnitsImperial">Imperial (lb, in)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-t="langTimeLabel">Time Format</label>
-          <select class="form-select">
-            <option value="12h" data-t="langTime12">12-hour</option>
-            <option value="24h" data-t="langTime24">24-hour</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="wizard-nav">
-      <div class="nav-left"><button class="btn" onclick="goPrev()" data-t="btnBack">← Back</button></div>
-      <span class="step-counter" data-step="2"></span>
-      <div class="nav-right"><button class="btn btn-primary" onclick="goNext()" data-t="btnNext">Next →</button></div>
-    </div>
-  </div>
-
-  <!-- ═══ STEP 3: TRAINING ═══ -->
-  <div class="step-panel" id="step-2">
-    <div class="card">
-      <h2 class="card-title" data-t="trainingTitle">Training Type</h2>
-      <p class="card-desc" data-t="trainingDesc">Select your primary workout focus</p>
-      <div class="option-grid">
-        <div class="option-card" data-group="training" data-val="strength" onclick="selectOption(this)">
-          <div class="option-icon">💪</div>
-          <div class="option-title" data-t="trainingStrength">Strength Training</div>
-          <div class="option-desc"  data-t="trainingStrengthDesc">Build muscle and power</div>
-        </div>
-        <div class="option-card selected" data-group="training" data-val="cardio" onclick="selectOption(this)">
-          <div class="option-icon">🏃</div>
-          <div class="option-title" data-t="trainingCardio">Cardio</div>
-          <div class="option-desc"  data-t="trainingCardioDesc">Improve endurance</div>
-        </div>
-        <div class="option-card" data-group="training" data-val="yoga" onclick="selectOption(this)">
-          <div class="option-icon">🧘</div>
-          <div class="option-title" data-t="trainingYoga">Yoga &amp; Flexibility</div>
-          <div class="option-desc"  data-t="trainingYogaDesc">Enhance mobility</div>
-        </div>
-        <div class="option-card" data-group="training" data-val="hiit" onclick="selectOption(this)">
-          <div class="option-icon">⚡</div>
-          <div class="option-title" data-t="trainingHiit">HIIT</div>
-          <div class="option-desc"  data-t="trainingHiitDesc">High-intensity intervals</div>
-        </div>
-        <div class="option-card" data-group="training" data-val="sports" onclick="selectOption(this)">
-          <div class="option-icon">⚽</div>
-          <div class="option-title" data-t="trainingSports">Sports Training</div>
-          <div class="option-desc"  data-t="trainingSportsDesc">Sport-specific drills</div>
-        </div>
-        <div class="option-card" data-group="training" data-val="mixed" onclick="selectOption(this)">
-          <div class="option-icon">🔄</div>
-          <div class="option-title" data-t="trainingMixed">Mixed Training</div>
-          <div class="option-desc"  data-t="trainingMixedDesc">Balanced approach</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <h2 class="card-title" data-t="levelTitle">Fitness Level</h2>
-      <p class="card-desc" data-t="levelDesc">Help us tailor your workouts</p>
-      <div class="option-grid">
-        <div class="option-card" data-group="level" data-val="beginner" onclick="selectOption(this)">
-          <div class="option-icon">🌱</div>
-          <div class="option-title" data-t="levelBeginner">Beginner</div>
-          <div class="option-desc"  data-t="levelBeginnerDesc">Starting my journey</div>
-        </div>
-        <div class="option-card selected" data-group="level" data-val="intermediate" onclick="selectOption(this)">
-          <div class="option-icon">🔥</div>
-          <div class="option-title" data-t="levelIntermediate">Intermediate</div>
-          <div class="option-desc"  data-t="levelIntermediateDesc">Regular workouts</div>
-        </div>
-        <div class="option-card" data-group="level" data-val="advanced" onclick="selectOption(this)">
-          <div class="option-icon">🏆</div>
-          <div class="option-title" data-t="levelAdvanced">Advanced</div>
-          <div class="option-desc"  data-t="levelAdvancedDesc">Experienced athlete</div>
-        </div>
+        <label class="form-label">New Password</label>
+        <input type="password" class="form-input" id="newPass" placeholder="••••••••" oninput="checkPassStrength(this.value)">
+        <div class="pass-strength"><div class="pass-strength-bar" id="passBar"></div></div>
+        <p class="pass-strength-label" id="passLabel" style="color:var(--text-d);">Enter a new password</p>
       </div>
       <div class="form-group">
-        <label class="form-label" data-t="weeklyGoalsLabel">Weekly Training Goals</label>
-        <select class="form-select">
-          <option value="2-3"    data-t="weeklyGoals23">2-3 sessions per week</option>
-          <option value="4-5"    data-t="weeklyGoals45" selected>4-5 sessions per week</option>
-          <option value="6-7"    data-t="weeklyGoals67">6-7 sessions per week</option>
-          <option value="custom" data-t="weeklyGoalsCustom">Custom schedule</option>
-        </select>
+        <label class="form-label">Confirm New Password</label>
+        <input type="password" class="form-input" id="confirmPass" placeholder="••••••••">
       </div>
+
+      <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
     </div>
-    <div class="wizard-nav">
-      <div class="nav-left"><button class="btn" onclick="goPrev()" data-t="btnBack">← Back</button></div>
-      <span class="step-counter" data-step="3"></span>
-      <div class="nav-right"><button class="btn btn-primary" onclick="goNext()" data-t="btnNext">Next →</button></div>
+
+    <div class="card" style="margin-top:16px;">
+      <h2 class="card-title" style="color:var(--red);">Danger Zone</h2>
+      <p class="card-desc">These actions are permanent and cannot be undone.</p>
+      <button class="btn" style="border-color:rgba(255,107,107,0.4);color:var(--red);"
+              onclick="confirmDeleteAccount()">Delete My Account</button>
     </div>
   </div>
 
-  <!-- ═══ STEP 4: PREFERENCES ═══ -->
-  <div class="step-panel" id="step-3">
-    <div class="card">
-      <h2 class="card-title" data-t="prefDisplayTitle">Display Settings</h2>
-      <p class="card-desc" data-t="prefDisplayDesc">Customize your mirror interface</p>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefHeartRate">Show Heart Rate Monitor</div><div class="toggle-desc" data-t="prefHeartRateDesc">Display real-time heart rate data</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefCalories">Show Calorie Counter</div><div class="toggle-desc" data-t="prefCaloriesDesc">Track calories burned during workout</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefSkeleton">Show Skeleton Tracking</div><div class="toggle-desc" data-t="prefSkeletonDesc">Real-time form analysis overlay</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefReps">Show Rep Counter</div><div class="toggle-desc" data-t="prefRepsDesc">Automatic repetition counting</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-    </div>
-    <div class="card">
-      <h2 class="card-title" data-t="prefAudioTitle">Audio &amp; Voice</h2>
-      <p class="card-desc" data-t="prefAudioDesc">Configure audio feedback settings</p>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefVoice">Voice Coaching</div><div class="toggle-desc" data-t="prefVoiceDesc">Get audio guidance during workouts</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefAlerts">Form Correction Alerts</div><div class="toggle-desc" data-t="prefAlertsDesc">Audio alerts for improper form</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefMotivation">Motivational Prompts</div><div class="toggle-desc" data-t="prefMotivationDesc">Encouragement during tough sets</div></div>
-        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
-      </div>
-      <div class="toggle-group">
-        <div><div class="toggle-label" data-t="prefMusic">Background Music</div><div class="toggle-desc" data-t="prefMusicDesc">Play music during workouts</div></div>
-        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
-      </div>
-    </div>
-    <div class="wizard-nav">
-      <div class="nav-left"><button class="btn" onclick="goPrev()" data-t="btnBack">← Back</button></div>
-      <span class="step-counter" data-step="4"></span>
-      <div class="nav-right"><button class="btn btn-primary" onclick="goNext()" data-t="btnNext">Next →</button></div>
-    </div>
-  </div>
+</div><!-- /config-container -->
 
-  <!-- ═══ STEP 5: PROFILE ═══ -->
-  <div class="step-panel" id="step-4">
-    <div class="card">
-      <h2 class="card-title" data-t="profileTitle">Your Profile</h2>
-      <p class="card-desc" data-t="profileDesc">Personal information and fitness data</p>
-      <div class="profile-avatar">JD<div class="avatar-edit">📷</div></div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" data-t="profileFirstName">First Name</label>
-          <input type="text" class="form-input" id="p_first" value="John">
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-t="profileLastName">Last Name</label>
-          <input type="text" class="form-input" id="p_last" value="Doe">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" data-t="profileAge">Age</label>
-          <input type="number" class="form-input" id="p_age" value="28">
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-t="profileGender">Gender</label>
-          <select class="form-select" id="p_gender">
-            <option value="male"   data-t="profileGenderMale">Male</option>
-            <option value="female" data-t="profileGenderFemale">Female</option>
-            <option value="other"  data-t="profileGenderOther">Other</option>
-            <option value="prefer" data-t="profileGenderPrefer">Prefer not to say</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" data-t="profileHeight">Height (cm)</label>
-          <input type="number" class="form-input" id="p_height" value="175">
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-t="profileWeight">Weight (kg)</label>
-          <input type="number" class="form-input" id="p_weight" value="70">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label" data-t="profileGoalsLabel">Fitness Goals</label>
-        <select class="form-select" id="p_goal">
-          <option value="lose-weight"          data-t="profileGoalLoseWeight">Lose Weight</option>
-          <option value="build-muscle"         data-t="profileGoalBuildMuscle">Build Muscle</option>
-          <option value="improve-endurance"    data-t="profileGoalEndurance">Improve Endurance</option>
-          <option value="increase-flexibility" data-t="profileGoalFlexibility">Increase Flexibility</option>
-          <option value="general-fitness"      data-t="profileGoalGeneral">General Fitness</option>
-          <option value="athletic-performance" data-t="profileGoalAthletic">Athletic Performance</option>
-        </select>
-      </div>
-    </div>
-    <div class="wizard-nav">
-      <div class="nav-left"><button class="btn" onclick="goPrev()" data-t="btnBack">← Back</button></div>
-      <span class="step-counter" data-step="5"></span>
-      <div class="nav-right"><button class="btn btn-submit" onclick="submitForm()" data-t="btnSubmit">✓ Update</button></div>
-    </div>
-  </div>
-
-  <!-- ═══ FINAL SUCCESS ═══ -->
-  <div class="final-success card" id="finalSuccess">
-    <div class="success-icon">✓</div>
-    <h2 data-t="finalTitle">Setup Complete!</h2>
-    <p data-t="finalDesc">Your Smart Mirror is configured and ready. Your personalized fitness experience awaits.</p>
-    <button class="btn btn-submit" onclick="resetForm()" data-t="btnReset">Start Fresh ↺</button>
-  </div>
-
+<!-- Save bar feedback -->
+<div class="save-bar" id="saveBar">
+  <span id="saveBarText">✓ Changes saved successfully!</span>
+  <button class="btn" style="padding:6px 14px;font-size:12px;" onclick="hideSaveBar()">OK</button>
 </div>
 
-<!-- PHP form -->
-<form id="phpForm" method="POST" action="save-config.php" style="display:none;">
-  <input type="hidden" name="config_data" id="configDataInput">
-</form>
+<script src="../shared/toast.js"></script>
+<script src="../shared/navbar.js"></script>
+<script>
+// ════════════════════════════════════════
+// GLOBAL STATE
+// ════════════════════════════════════════
+const BACKEND_URL = window.env?.BACKEND_URL || "http://localhost:3000";
+const token = localStorage.getItem("token");
+let base64Avatar = "";
+let faceRegistered = false;
+let webcamStream = null;
 
-<script src="js/script.js"></script>
+// Redirect if no token
+if (!token) window.location.href = "sign-in.html";
+
+// ── Display settings stored in localStorage ──
+const DISPLAY_KEYS = ["show_heartrate","show_calories","show_skeleton","show_reps","show_timer","voice_coaching","form_alerts","show_video"];
+
+// ════════════════════════════════════════
+// INIT — Load user data on page load
+// ════════════════════════════════════════
+async function init() {
+  loadDisplaySettings();
+  await loadUserData();
+}
+
+async function loadUserData() {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/me`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    const data = await res.json();
+
+    if (!data.ok) {
+      toast.error("Could not load profile data. Please log in again.");
+      return;
+    }
+
+    const user    = data.user;
+    const profile = user.profile || {};
+
+    // Populate account tab
+    const firstName = profile.firstName || (profile.name ? profile.name.split(" ")[0] : "");
+    const lastName  = profile.lastName  || (profile.name ? profile.name.split(" ").slice(1).join(" ") : "");
+    document.getElementById("profileFirstName").value = firstName;
+    document.getElementById("profileLastName").value  = lastName;
+    document.getElementById("profileEmail").value     = user.email || "";
+
+    // Populate body stats
+    if (profile.age)    document.getElementById("profileAge").value    = profile.age;
+    if (profile.height) document.getElementById("profileHeight").value = profile.height;
+    if (profile.weight) document.getElementById("profileWeight").value = profile.weight;
+    if (profile.gender) document.getElementById("profileGender").value = profile.gender;
+    if (profile.fitnessGoal) document.getElementById("profileGoal").value = profile.fitnessGoal;
+
+    // Avatar
+    const avatarSrc = profile.avatar || localStorage.getItem("sm_avatar");
+    updateAvatarUI(avatarSrc, firstName || user.email?.split("@")[0] || "?");
+
+    // Face ID status
+    if (profile.faceRegistered) {
+      faceRegistered = true;
+      updateFaceIdStatus(true);
+    }
+
+    // Cache user
+    localStorage.setItem("sm_user", JSON.stringify(user));
+
+  } catch (err) {
+    toast.error("Connection error. Could not load profile.");
+    console.error(err);
+  }
+}
+
+// ════════════════════════════════════════
+// AVATAR
+// ════════════════════════════════════════
+function updateAvatarUI(src, name) {
+  const circle   = document.getElementById("avatarCircle");
+  const letterEl = document.getElementById("avatarLetter");
+  const letter   = (name || "?").trim().charAt(0).toUpperCase();
+
+  if (src && src.startsWith("data:")) {
+    letterEl.style.display = "none";
+    let img = circle.querySelector("img");
+    if (!img) {
+      img = document.createElement("img");
+      circle.appendChild(img);
+    }
+    img.src = src;
+  } else {
+    letterEl.style.display = "";
+    letterEl.textContent = letter;
+    const img = circle.querySelector("img");
+    if (img) img.remove();
+  }
+}
+
+// File upload
+document.getElementById("avatarFileInput").addEventListener("change", function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    toast.error("File is too large. Please choose an image under 5MB.");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    base64Avatar = ev.target.result;
+    updateAvatarUI(base64Avatar, document.getElementById("profileFirstName").value || "?");
+    toast.info("Photo selected. Click 'Save Account Changes' to apply.", "Photo Ready");
+  };
+  reader.readAsDataURL(file);
+});
+
+// Remove avatar
+document.getElementById("btnRemoveAvatar").addEventListener("click", () => {
+  base64Avatar = "REMOVE";
+  const circle   = document.getElementById("avatarCircle");
+  const letterEl = document.getElementById("avatarLetter");
+  const img      = circle.querySelector("img");
+  if (img) img.remove();
+  const name = document.getElementById("profileFirstName").value || "?";
+  letterEl.textContent = name.trim().charAt(0).toUpperCase();
+  letterEl.style.display = "";
+  toast.info("Avatar removed. Save to confirm.");
+});
+
+// Webcam capture
+document.getElementById("btnFaceCapture").addEventListener("click", async () => {
+  const btn   = document.getElementById("btnFaceCapture");
+  const video = document.getElementById("webcamVideo");
+  const canvas = document.getElementById("webcamCanvas");
+
+  if (!webcamStream) {
+    try {
+      webcamStream = await navigator.mediaDevices.getUserMedia({ video: { width: 300, height: 300 }, audio: false });
+      video.srcObject = webcamStream;
+      video.style.display = "block";
+      btn.textContent = "📸 Snap Photo";
+    } catch (err) {
+      toast.error("Could not access your camera. Please check permissions.", "Camera Error");
+    }
+  } else {
+    const ctx = canvas.getContext("2d");
+    canvas.width  = video.videoWidth  || 300;
+    canvas.height = video.videoHeight || 300;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    base64Avatar = canvas.toDataURL("image/jpeg");
+    updateAvatarUI(base64Avatar, document.getElementById("profileFirstName").value || "?");
+    webcamStream.getTracks().forEach((t) => t.stop());
+    webcamStream = null;
+    video.style.display = "none";
+    btn.textContent = "📸 Retake Photo";
+    toast.success("Photo captured! Save to apply.", "Photo Ready");
+  }
+});
+
+// ════════════════════════════════════════
+// FACE ID
+// ════════════════════════════════════════
+function updateFaceIdStatus(registered) {
+  const el = document.getElementById("faceIdStatus");
+  const btn = document.getElementById("btnRegisterFace");
+  if (registered) {
+    el.textContent = "✓ Registered";
+    el.className = "face-id-status registered";
+    btn.textContent = "Re-register Face";
+  } else {
+    el.textContent = "Not Registered";
+    el.className = "face-id-status not-registered";
+    btn.textContent = "Register Face";
+  }
+}
+
+// ════════════════════════════════════════
+// FACE ID REGISTRATION
+// Flow:
+//  1. User clicks "Register Face"
+//  2. POST /api/face/registerFace  → Python AI starts capturing
+//  3. POST /api/face/trainFace     → train the model
+//  4. Update profile.faceRegistered = true in DB
+// ════════════════════════════════════════
+ 
+let faceRegisterStream = null;
+ 
+document.getElementById("btnRegisterFace").addEventListener("click", async () => {
+  // Show the webcam area below the face-id-zone
+  showFaceRegisterUI();
+});
+ 
+function showFaceRegisterUI() {
+  // Reuse the existing webcam video element (already in profile.html)
+  // If not present, create a simple modal
+  const zone = document.querySelector(".face-id-zone");
+  if (!zone) return;
+ 
+  // Check if UI already injected
+  if (document.getElementById("faceRegisterModal")) {
+    document.getElementById("faceRegisterModal").style.display = "flex";
+    startFaceRegisterCapture();
+    return;
+  }
+ 
+  // Inject face register modal into DOM
+  const modal = document.createElement("div");
+  modal.id = "faceRegisterModal";
+  modal.style.cssText = `
+    display:flex; flex-direction:column; align-items:center; gap:16px;
+    background:rgba(0,0,0,0.85); border:1px solid rgba(58,231,225,0.3);
+    border-radius:16px; padding:24px; margin-top:16px;
+    backdrop-filter:blur(16px);
+  `;
+  modal.innerHTML = `
+    <div style="font-family:'Orbitron',monospace;font-size:11px;letter-spacing:3px;color:#3ae7e1;text-transform:uppercase;">
+      Face Registration
+    </div>
+    <div style="position:relative;width:200px;height:200px;border-radius:50%;overflow:hidden;border:3px solid rgba(58,231,225,0.6);box-shadow:0 0 30px rgba(58,231,225,0.2);">
+      <video id="faceRegVideo" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+      <div id="faceRegScanLine" style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#3ae7e1,transparent);box-shadow:0 0 8px #3ae7e1;animation:scanLine 2s ease-in-out infinite;"></div>
+    </div>
+    <div id="faceRegStatus" style="font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;color:#3ae7e1;text-transform:uppercase;text-align:center;min-height:20px;">
+      Preparing camera...
+    </div>
+    <div id="faceRegProgress" style="width:200px;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;display:none;">
+      <div id="faceRegProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#3ae7e1,#5fffc3);border-radius:2px;transition:width 0.3s;"></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button id="faceRegStartBtn" onclick="startFaceRegisterCapture()"
+        style="padding:8px 18px;background:rgba(58,231,225,0.12);border:1px solid rgba(58,231,225,0.4);border-radius:8px;color:#3ae7e1;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">
+        Start
+      </button>
+      <button onclick="closeFaceRegisterUI()"
+        style="padding:8px 18px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:rgba(255,255,255,0.5);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">
+        Cancel
+      </button>
+    </div>
+  `;
+  zone.insertAdjacentElement("afterend", modal);
+  startFaceRegisterCapture();
+}
+ 
+async function startFaceRegisterCapture() {
+  const statusEl   = document.getElementById("faceRegStatus");
+  const video      = document.getElementById("faceRegVideo");
+  const progressEl = document.getElementById("faceRegProgress");
+  const startBtn   = document.getElementById("faceRegStartBtn");
+  if (!statusEl || !video) return;
+ 
+  if (startBtn) startBtn.style.display = "none";
+  statusEl.textContent = "Starting camera...";
+  statusEl.style.color = "#3ae7e1";
+ 
+  try {
+    faceRegisterStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 480, height: 480, facingMode: "user" },
+      audio: false,
+    });
+    video.srcObject = faceRegisterStream;
+ 
+    video.onloadedmetadata = async () => {
+      statusEl.textContent = "Look at the camera — registering...";
+      if (progressEl) {
+        progressEl.style.display = "block";
+        let prog = 0;
+        const progTimer = setInterval(() => {
+          prog = Math.min(prog + 3, 85);
+          const fill = document.getElementById("faceRegProgressFill");
+          if (fill) fill.style.width = prog + "%";
+        }, 150);
+ 
+        try {
+          // Step 1: Register face with the AI server
+          // The Python server captures the face from its own camera
+          // We pass the user's ID and name
+          const userId = JSON.parse(localStorage.getItem("sm_user"))?._id || "";
+          const name   = document.getElementById("profileFirstName")?.value ||
+                         JSON.parse(localStorage.getItem("sm_user"))?.profile?.name || "User";
+ 
+          const regRes  = await fetch(`${BACKEND_URL}/api/face/register`, {
+            method:  "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + token,
+            },
+            body: JSON.stringify({ user_id: userId, name }),
+          });
+          const regData = await regRes.json();
+ 
+          if (!regData.ok) throw new Error(regData.error || "Registration failed");
+ 
+          // Step 2: Train the model
+          statusEl.textContent = "Training model...";
+          const trainRes  = await fetch(`${BACKEND_URL}/api/face/train`, {
+            method:  "POST",
+            headers: { "Authorization": "Bearer " + token },
+          });
+          const trainData = await trainRes.json();
+          if (!trainData.ok) throw new Error(trainData.error || "Training failed");
+ 
+          // Step 3: Save faceRegistered = true in profile
+          await fetch(`${BACKEND_URL}/api/user/setup`, {
+            method:  "POST",
+            headers: {
+              "Content-Type":  "application/json",
+              "Authorization": "Bearer " + token,
+            },
+            body: JSON.stringify({ profile: { faceRegistered: true } }),
+          });
+ 
+          clearInterval(progTimer);
+          const fill = document.getElementById("faceRegProgressFill");
+          if (fill) fill.style.width = "100%";
+ 
+          statusEl.textContent = "✓ Face registered successfully!";
+          statusEl.style.color = "#5fffc3";
+ 
+          faceRegistered = true;
+          updateFaceIdStatus(true);
+          toast.success("Face ID registered! You can now log in with your face.", "Face ID");
+ 
+          // Close after 2s
+          setTimeout(() => closeFaceRegisterUI(), 2000);
+ 
+        } catch (err) {
+          clearInterval(progTimer);
+          statusEl.textContent = err.message || "Registration failed";
+          statusEl.style.color = "#ff4d6a";
+          if (startBtn) { startBtn.style.display = "block"; startBtn.textContent = "Try Again"; }
+          toast.error(err.message || "Face registration failed. Please try again.", "Error");
+        } finally {
+          stopFaceRegisterStream();
+        }
+      }
+    };
+  } catch (err) {
+    statusEl.textContent = "Camera access denied";
+    statusEl.style.color = "#ff4d6a";
+    if (startBtn) { startBtn.style.display = "block"; startBtn.textContent = "Try Again"; }
+    toast.error("Could not access camera. Check permissions.", "Camera Error");
+  }
+}
+ 
+function closeFaceRegisterUI() {
+  stopFaceRegisterStream();
+  const modal = document.getElementById("faceRegisterModal");
+  if (modal) modal.style.display = "none";
+}
+ 
+function stopFaceRegisterStream() {
+  if (faceRegisterStream) {
+    faceRegisterStream.getTracks().forEach(t => t.stop());
+    faceRegisterStream = null;
+  }
+}
+
+// ════════════════════════════════════════
+// SAVE FUNCTIONS
+// ════════════════════════════════════════
+async function saveAccountInfo() {
+  const firstName = document.getElementById("profileFirstName").value.trim();
+  const lastName  = document.getElementById("profileLastName").value.trim();
+
+  if (!firstName) {
+    toast.error("First name is required.");
+    return;
+  }
+
+  const profileData = {
+    profile: {
+      firstName,
+      lastName,
+      name: `${firstName} ${lastName}`.trim(),
+    }
+  };
+
+  // Attach avatar if changed
+  if (base64Avatar && base64Avatar !== "REMOVE") {
+    profileData.profile.avatar = base64Avatar;
+    localStorage.setItem("sm_avatar", base64Avatar);
+  } else if (base64Avatar === "REMOVE") {
+    profileData.profile.avatar = "";
+    localStorage.removeItem("sm_avatar");
+  }
+
+  await patchProfile(profileData, "Account info updated!");
+
+  // Refresh navbar avatar
+  window.smNavbar?.refresh();
+}
+
+async function saveBodyStats() {
+  const profileData = {
+    profile: {
+      age:         Number(document.getElementById("profileAge").value)    || undefined,
+      height:      Number(document.getElementById("profileHeight").value) || undefined,
+      weight:      Number(document.getElementById("profileWeight").value) || undefined,
+      gender:      document.getElementById("profileGender").value,
+      fitnessGoal: document.getElementById("profileGoal").value,
+    }
+  };
+  await patchProfile(profileData, "Body stats saved!");
+}
+
+async function saveTrainingPrefs() {
+  const trainingType = document.querySelector('[data-group="training"].selected')?.dataset.value || "";
+  const level        = document.querySelector('[data-group="level"].selected')?.dataset.value || "";
+  const profileData  = { training: { type: trainingType, level } };
+  await patchProfile(profileData, "Training preferences saved!");
+}
+
+async function saveDisplaySettings() {
+  const settings = {};
+  DISPLAY_KEYS.forEach((key) => {
+    const tog = document.getElementById("tog-" + key.replace("show_","").replace("_",""));
+    if (!tog) {
+      // Try full key id
+      const el = document.getElementById("tog-" + key.replace(/_/g, ""));
+      settings[key] = el ? el.classList.contains("active") : true;
+    } else {
+      settings[key] = tog.classList.contains("active");
+    }
+  });
+  localStorage.setItem("sm_display_settings", JSON.stringify(settings));
+  toast.success("Display settings saved!", "Settings");
+  showSaveBar("Display settings saved and applied to dashboard!");
+}
+
+// Unified PATCH to backend
+async function patchProfile(data, successMsg) {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/user/setup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+
+    if (!result.ok) {
+      toast.error(result.error || "Failed to save changes.", "Save Error");
+      return false;
+    }
+
+    toast.success(successMsg || "Changes saved!");
+    showSaveBar(successMsg || "Changes saved!");
+    // Update cache
+    localStorage.removeItem("sm_user");
+    return true;
+
+  } catch (err) {
+    toast.error("Connection error. Please check your internet.", "Network Error");
+    console.error(err);
+    return false;
+  }
+}
+
+// ════════════════════════════════════════
+// CHANGE PASSWORD
+// ════════════════════════════════════════
+async function changePassword() {
+  const current = document.getElementById("currentPass").value;
+  const newPass  = document.getElementById("newPass").value;
+  const confirm  = document.getElementById("confirmPass").value;
+
+  if (!current || !newPass || !confirm) {
+    toast.error("Please fill in all password fields.");
+    return;
+  }
+  if (newPass.length < 6) {
+    toast.error("New password must be at least 6 characters.");
+    return;
+  }
+  if (newPass !== confirm) {
+    toast.error("Passwords don't match. Please try again.");
+    return;
+  }
+
+  // Frontend placeholder — backend endpoint for password change
+  toast.info("Password change will be connected to the backend soon.", "Coming Soon");
+  /* When backend is ready:
+  await patchProfile({ password: { current, newPassword: newPass } }, "Password updated!");
+  document.getElementById("currentPass").value = "";
+  document.getElementById("newPass").value = "";
+  document.getElementById("confirmPass").value = "";
+  */
+}
+
+function checkPassStrength(val) {
+  const bar   = document.getElementById("passBar");
+  const label = document.getElementById("passLabel");
+  let score = 0;
+  if (val.length >= 6)  score++;
+  if (val.length >= 10) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const pct    = [0, 20, 40, 65, 85, 100][score];
+  const colors = ["#ff4d6a","#ffd250","#ffd250","#5fffc3","#5fffc3"];
+  const labels = ["Too short","Weak","Fair","Good","Strong","Very strong"];
+
+  bar.style.width = pct + "%";
+  bar.style.background = colors[Math.min(score-1, 4)] || "#ff4d6a";
+  label.textContent = score > 0 ? labels[score] : "Enter a new password";
+  label.style.color  = colors[Math.min(score-1, 4)] || "var(--text-d)";
+}
+
+// ════════════════════════════════════════
+// DISPLAY SETTINGS — sync with dashboard
+// ════════════════════════════════════════
+function loadDisplaySettings() {
+  const saved = JSON.parse(localStorage.getItem("sm_display_settings") || "{}");
+  const defaults = {
+    show_heartrate: true, show_calories: true, show_skeleton: true,
+    show_reps: true, show_timer: true, voice_coaching: false,
+    form_alerts: true, show_video: true
+  };
+  const settings = { ...defaults, ...saved };
+
+  const mapping = {
+    show_heartrate: "tog-heartrate", show_calories: "tog-calories",
+    show_skeleton: "tog-skeleton",   show_reps: "tog-reps",
+    show_timer: "tog-timer",         voice_coaching: "tog-voice",
+    form_alerts: "tog-alerts",       show_video: "tog-video"
+  };
+
+  Object.entries(mapping).forEach(([key, elId]) => {
+    const el = document.getElementById(elId);
+    if (el) {
+      if (settings[key]) el.classList.add("active");
+      else el.classList.remove("active");
+    }
+  });
+}
+
+function toggleSetting(el, key) {
+  el.classList.toggle("active");
+  // Auto-save display settings to localStorage immediately
+  const saved = JSON.parse(localStorage.getItem("sm_display_settings") || "{}");
+  saved[key] = el.classList.contains("active");
+  localStorage.setItem("sm_display_settings", JSON.stringify(saved));
+}
+
+// ════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll(".tab-section").forEach((s) => s.classList.remove("active"));
+  document.querySelectorAll(".profile-tab").forEach((t) => t.classList.remove("active"));
+  document.getElementById("tab-" + name)?.classList.add("active");
+  event.currentTarget.classList.add("active");
+}
+
+// ════════════════════════════════════════
+// OPTION CARDS
+// ════════════════════════════════════════
+function selectOption(card) {
+  const group = card.getAttribute("data-group");
+  document.querySelectorAll(`[data-group="${group}"]`).forEach((c) => c.classList.remove("selected"));
+  card.classList.add("selected");
+}
+
+// ════════════════════════════════════════
+// SAVE BAR
+// ════════════════════════════════════════
+function showSaveBar(msg) {
+  const bar = document.getElementById("saveBar");
+  document.getElementById("saveBarText").textContent = "✓ " + (msg || "Changes saved!");
+  bar.classList.add("show");
+  setTimeout(() => bar.classList.remove("show"), 4000);
+}
+function hideSaveBar() {
+  document.getElementById("saveBar").classList.remove("show");
+}
+
+// ════════════════════════════════════════
+// DANGER — Delete Account
+// ════════════════════════════════════════
+function confirmDeleteAccount() {
+  // Use a custom confirm via toast for now
+  toast.warning("Account deletion is currently disabled. Contact support to delete your account.", "Danger Zone", 6000);
+}
+
+// ════════════════════════════════════════
+// LANGUAGE
+// ════════════════════════════════════════
+function onLangChange(val) {
+  localStorage.setItem("sm_lang", val);
+  toast.info(`Language preference saved: ${val === "ar" ? "Arabic" : "English"}`, "Language");
+}
+
+// ── Init ──
+init();
+</script>
 </body>
 </html>
