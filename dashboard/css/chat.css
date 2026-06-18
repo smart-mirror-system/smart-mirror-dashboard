@@ -189,3 +189,50 @@
     margin-left: 15px;
     animation: blink 1.5s infinite;
 }
+
+/* ─── MARKDOWN STYLING INSIDE BUBBLES ─── */
+.msg-bubble p {
+    margin: 0 0 10px 0;
+}
+
+.msg-bubble p:last-child {
+    margin-bottom: 0;
+}
+
+.msg-bubble ul, .msg-bubble ol {
+    margin: 10px 0 10px 20px;
+    padding: 0;
+}
+
+.msg-bubble li {
+    margin-bottom: 5px;
+}
+
+.msg-bubble strong {
+    color: #3ae7e1;
+    font-weight: 700;
+}
+
+.msg-bubble code {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    color: #4ba3ff;
+}
+
+.msg-bubble pre {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 10px 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.msg-bubble pre code {
+    background: transparent;
+    padding: 0;
+    color: #e2e8f0;
+}

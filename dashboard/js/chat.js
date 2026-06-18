@@ -9,6 +9,7 @@ if (!token) {
 let socket;
 let currentChatId = null;
 let currentBotMsgElement = null;
+let currentBotRawText = ""; // Track unparsed stream contents 
 
 // DOM Elements
 const chatListEl = document.getElementById("chatList");
@@ -47,17 +48,22 @@ function initSocket() {
     socket.on("chat:chunk", (data) => {
         if (!currentBotMsgElement) {
             currentBotMsgElement = createMessageElement("Bot", "");
+            currentBotRawText = ""; // Reset raw text layer
         }
-        currentBotMsgElement.innerHTML += data.text.replace(/\n/g, "<br>");
+        
+        // Append raw stream token and compile markdown dynamically
+        currentBotRawText += data.text;
+        currentBotMsgElement.innerHTML = marked.parse(currentBotRawText);
         chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
     });
 
     // Finalize message
     socket.on("chat:reply:done", (data) => {
         if (currentBotMsgElement && data.fullText) {
-            currentBotMsgElement.innerHTML = data.fullText.replace(/\n/g, "<br>");
+            currentBotMsgElement.innerHTML = marked.parse(data.fullText);
         }
         currentBotMsgElement = null;
+        currentBotRawText = "";
         typingIndicator.style.display = "none";
     });
 
@@ -134,7 +140,7 @@ async function loadChat(chatId, title) {
         const data = await res.json();
         if (data.ok) {
             chatMessagesEl.innerHTML = "";
-            // Messages usually come newest first depending on pagination, assuming oldest first for display:
+            // Reverse historical page mapping arrays to balance historical visibility flow
             const messages = data.chatMessages.reverse(); 
             messages.forEach(msg => createMessageElement(msg.role, msg.message));
             chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
@@ -183,7 +189,10 @@ function renderChatList(chats) {
 function createMessageElement(role, text) {
     const div = document.createElement("div");
     div.className = `msg-bubble ${role === "User" ? "msg-user" : "msg-bot"}`;
-    div.innerHTML = text.replace(/\n/g, "<br>");
+    
+    // Process markdown string structures safely. If text content is falsey/empty during streaming setups, assign empty text payload.
+    div.innerHTML = text ? marked.parse(text) : "";
+    
     chatMessagesEl.appendChild(div);
     chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
     return div;
@@ -197,11 +206,11 @@ function sendMessage() {
     const text = chatInput.value.trim();
     if (!text || !currentChatId) return;
 
-    // Output to UI
+    // Output raw user inputs securely
     createMessageElement("User", text);
     chatInput.value = "";
 
-    // Emit over socket
+    // Emit payload to Socket engine
     socket.emit("chat:message", {
         chatId: currentChatId,
         message: text
