@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SmartMirror — Mobile Sign In</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+
+  <script src="./js/sign-script.js"></script>
   <style>
     /* ── Mobile-first, optimized for phone screens ── */
     :root {
@@ -301,7 +304,7 @@
 
 <script src="../shared/toast.js"></script>
 <script>
-const BACKEND_URL = "http://localhost:3000";
+const BACKEND_URL = window.env?.BACKEND_URL || "http://localhost:3000";
 
 // ── Read session ID from URL ──
 const urlParams  = new URLSearchParams(window.location.search);

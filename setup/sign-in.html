@@ -6,6 +6,7 @@
 <title>Smart Mirror — Sign In</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/settings-style.css">
+
 <style>
 .face-scan-overlay {
   display:none; position:fixed; inset:0;
@@ -214,7 +215,7 @@
 
 <script src="../shared/toast.js"></script>
 <script>
-const BACKEND_URL = "http://localhost:3000";
+const BACKEND_URL = window.env?.BACKEND_URL || "http://localhost:3000";
 
 // ════════════════════════════════════════
 // QR SESSION
