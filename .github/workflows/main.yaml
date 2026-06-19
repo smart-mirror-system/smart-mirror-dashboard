@@ -51,8 +51,8 @@ jobs:
 
       - name: Inject Production Configurations
         run: |
-          find /usr/share/nginx/html -type f \( -name "*.js" -o -name "*.html" \) -exec sed -i "s|http://localhost:3000|${{ secrets.BACKEND_URL }}|g" {} +
-
+          find . -type f \( -name "*.js" -o -name "*.html" \) -exec sed -i "s|http://localhost:3000|${{ secrets.BACKEND_URL }}|g" {} +
+     
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
