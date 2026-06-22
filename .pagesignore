@@ -1,5 +1,15 @@
 .github/
+docs/
+
 .dockerignore
-docker*
+.env-ai.example
+.env-api.example
+.gitignore
+.pagesignore
+
 Dockerfile
+docker-compose.yaml
+docker-entrypoint.sh
+
 README.md
+AGENTS.md
