@@ -1,2 +1,3 @@
 .env-api
 .env-ai*Zone.Identifier*
+**/env-config.js
