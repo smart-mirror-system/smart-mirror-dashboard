@@ -13,7 +13,7 @@ const EXERCISES = {
     primary:   [], // مفيش عضلات للترحيب
     secondary: [],
     media: [
-      { src: "/smart-mirror-dashboard/assets/greeting.mp4", type: "video" } // فيديو الـ 3D اللي بيسلم
+      { src: "../assets/greeting.mp4", type: "video" } // فيديو الـ 3D اللي بيسلم
     ]
   },
   pushup: {
@@ -21,8 +21,8 @@ const EXERCISES = {
     primary:   ["chest", "triceps"],
     secondary: ["shoulders", "core"],
     media: [
-      { src: "/smart-mirror-dashboard/assets/push-up.gif", type: "gif" },
-      { src: "/smart-mirror-dashboard/assets/push-up.mp4", type: "video" }
+      { src: "../assets/push-up.gif", type: "gif" },
+      { src: "../assets/push-up.mp4", type: "video" }
     ]
   },
   squat: {
@@ -30,7 +30,7 @@ const EXERCISES = {
     primary:   ["quads", "glutes"],
     secondary: ["hamstrings", "core"],
     media: [
-      { src: "/smart-mirror-dashboard/assets/squat.gif", type: "gif" }
+      { src: "../assets/squat.gif", type: "gif" }
     ]
   },
   bicep_curl: {
@@ -38,9 +38,9 @@ const EXERCISES = {
     primary:   ["biceps"],
     secondary: ["forearms", "shoulders"],
     media: [
-      { src: "/smart-mirror-dashboard/assets/bicep-curl.gif", type: "gif" },
-      { src: "/smart-mirror-dashboard/assets/bicep-curl2.gif", type: "gif" },
-      { src: "/smart-mirror-dashboard/assets/bicep-curl.mp4", type: "video" }
+      { src: "../assets/bicep-curl.gif", type: "gif" },
+      { src: "../assets/bicep-curl2.gif", type: "gif" },
+      { src: "../assets/bicep-curl.mp4", type: "video" }
     ]
   },
   situp: {
@@ -48,8 +48,8 @@ const EXERCISES = {
     primary:   ["abs", "core"],
     secondary: ["hip_flexors"],
     media: [
-      { src: "/smart-mirror-dashboard/assets/situp.mp4", type: "video" },
-      { src: "/smart-mirror-dashboard/assets/situp.gif", type: "gif" }
+      { src: "../assets/situp.mp4", type: "video" },
+      { src: "../assets/situp.gif", type: "gif" }
     ]
   },
   lateral_raise: {
@@ -57,7 +57,7 @@ const EXERCISES = {
     primary:   ["shoulders"],
     secondary: ["core", "forearms"],
     media: [
-      { src: "/smart-mirror-dashboard/assets/lateral-raise.gif", type: "gif" }
+      { src: "../assets/lateral-raise.gif", type: "gif" }
     ]
   },
   overhead_press: {
@@ -65,7 +65,7 @@ const EXERCISES = {
     primary:   ["shoulders", "triceps"],
     secondary: ["chest", "core"],
     media: [
-      { src: "/smart-mirror-dashboard/assets/overhead-press.gif", type: "gif" }
+      { src: "../assets/overhead-press.gif", type: "gif" }
     ]
   },
   leg_raise: {
@@ -73,7 +73,7 @@ const EXERCISES = {
     primary:   ["core", "abs"],
     secondary: ["hip_flexors", "quads"],
     media: [
-      { src: "/smart-mirror-dashboard/assets/leg-raise.gif", type: "gif" }
+      { src: "../assets/leg-raise.gif", type: "gif" }
     ]
   },
   knee_raise: {
@@ -81,8 +81,8 @@ const EXERCISES = {
     primary:   ["core", "hip_flexors"],
     secondary: ["abs", "quads"],
     media: [
-      { src: "/smart-mirror-dashboard/assets/knee-raise.gif", type: "gif" },
-      { src: "/smart-mirror-dashboard/assets/knee-raise2.gif", type: "gif" }
+      { src: "../assets/knee-raise.gif", type: "gif" },
+      { src: "../assets/knee-raise2.gif", type: "gif" }
     ]
   },
   knee_press: {
@@ -90,7 +90,7 @@ const EXERCISES = {
     primary:   ["quads", "glutes"],
     secondary: ["hamstrings", "core"],
     media: [
-      { src: "/smart-mirror-dashboard/assets/high-kness.gif", type: "gif" }
+      { src: "../assets/high-kness.gif", type: "gif" }
     ]
   },
   crunch: {
@@ -98,8 +98,8 @@ const EXERCISES = {
     primary:   ["abs"],
     secondary: ["core"],
     media: [
-      { src: "/smart-mirror-dashboard/assets/crunch.gif", type: "gif" },
-      { src: "/smart-mirror-dashboard/assets/cross-crunch.gif", type: "gif" }
+      { src: "../assets/crunch.gif", type: "gif" },
+      { src: "../assets/cross-crunch.gif", type: "gif" }
     ]
   }
 };

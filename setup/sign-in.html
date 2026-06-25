@@ -215,6 +215,7 @@
 </div>
 
 <script src="../shared/toast.js"></script>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
 const BACKEND_URL = window.env?.BACKEND_URL || "http://localhost:3000";
 
@@ -290,9 +291,9 @@ function showMirrorSuccess(name) {
 }
 
 // ════════════════════════════════════════
-// FACE LOGIN
-// Calls POST /api/face/faceLogin
-// Backend hits Python AI server at localhost:8000/face/recognize
+// FACE LOGIN — Mrayti AI Biometrics
+// POST /ai/login with captured frame
+// Also pauses gesture AI model during scan
 // ════════════════════════════════════════
 let faceStream   = null;
 let faceScanning = false;
@@ -310,6 +311,9 @@ async function openFaceScan() {
   retryBtn.classList.remove("show");
   progressEl.classList.remove("show");
 
+  // Pause the hand-gesture AI model while using face camera
+  fetch(`${BACKEND_URL}/api/ai/pause`, { method: "POST" }).catch(() => {});
+
   try {
     faceStream = await navigator.mediaDevices.getUserMedia({
       video: { width: 480, height: 480, facingMode: "user" },
@@ -317,20 +321,17 @@ async function openFaceScan() {
     });
     video.srcObject = faceStream;
 
-    // Wait for video to be ready
     video.onloadedmetadata = () => {
       statusEl.textContent = "Hold still — scanning...";
       progressEl.classList.add("show");
       document.getElementById("faceScanProgressFill").style.width = "0%";
 
-      // Animate progress bar while scanning
       let prog = 0;
       const progTimer = setInterval(() => {
         prog = Math.min(prog + 4, 85);
         document.getElementById("faceScanProgressFill").style.width = prog + "%";
       }, 120);
 
-      // Slight delay to let camera stabilize
       setTimeout(async () => {
         await performFaceLogin(statusEl, retryBtn, progressEl, progTimer);
       }, 1800);
@@ -347,10 +348,21 @@ async function performFaceLogin(statusEl, retryBtn, progressEl, progTimer) {
   statusEl.textContent = "Recognizing...";
 
   try {
-    // Call backend — which triggers Python AI server to capture + recognize
-    const res  = await fetch(`${BACKEND_URL}/api/face/faceLogin`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
+    // Capture a frame from the live video
+    const video = document.getElementById("faceVideo");
+    const cvs = document.createElement("canvas");
+    cvs.width = 480;
+    cvs.height = 480;
+    cvs.getContext("2d").drawImage(video, 0, 0, 480, 480);
+
+    const blob = await new Promise(resolve => cvs.toBlob(resolve, "image/jpeg"));
+    const formData = new FormData();
+    formData.append("file", blob, "face.jpg");
+
+    // POST via API Gateway → Mrayti AI Biometrics Service
+    const res = await fetch(`${BACKEND_URL}/ai/login`, {
+      method: "POST",
+      body: formData,
     });
     const data = await res.json();
 
@@ -358,30 +370,44 @@ async function performFaceLogin(statusEl, retryBtn, progressEl, progTimer) {
     document.getElementById("faceScanProgressFill").style.width = "100%";
 
     if (!data.ok) {
-      statusEl.textContent = data.error || "Face not recognized";
+      statusEl.textContent = "Face not recognized";
       statusEl.className = "face-scan-status error";
       retryBtn.classList.add("show");
       toast.error("Face not recognized. Please try again or sign in with email.", "Face ID Failed");
       stopFaceStream();
+      fetch(`${BACKEND_URL}/api/ai/resume`, { method: "POST" }).catch(() => {});
       return;
     }
 
-    // Success
-    statusEl.textContent = `Welcome, ${data.name || "User"}!`;
-    statusEl.className = "face-scan-status success";
-
+    // Success — store JWT from biometrics service
     localStorage.setItem("token", data.token);
 
+    // Fetch user profile to get the user's name
+    let displayName = "User";
+    try {
+      const meRes = await fetch(`${BACKEND_URL}/api/me`, {
+        headers: { Authorization: "Bearer " + data.token }
+      });
+      const meData = await meRes.json();
+      if (meData.ok && meData.user) {
+        const p = meData.user.profile || {};
+        displayName = p.name || p.firstName || meData.user.email?.split("@")[0] || "User";
+      }
+    } catch {}
+
+    statusEl.textContent = `Welcome, ${displayName}!`;
+    statusEl.className = "face-scan-status success";
+
     if (SESSION_ID) {
-      await notifyMirror(SESSION_ID, data.token, data.name || "User");
+      await notifyMirror(SESSION_ID, data.token, displayName);
       setTimeout(() => {
         closeFaceScan();
-        showMirrorSuccess(data.name || "User");
+        showMirrorSuccess(displayName);
       }, 1000);
       return;
     }
 
-    toast.success(`Welcome back, ${data.name || "User"}!`, "Face ID Login");
+    toast.success(`Welcome back, ${displayName}!`, "Face ID Login");
     setTimeout(() => {
       closeFaceScan();
       window.location.href = "../dashboard/index.html";
@@ -394,6 +420,7 @@ async function performFaceLogin(statusEl, retryBtn, progressEl, progTimer) {
     retryBtn.classList.add("show");
     toast.error("Could not connect to the AI server.", "Error");
     stopFaceStream();
+    fetch(`${BACKEND_URL}/api/ai/resume`, { method: "POST" }).catch(() => {});
   }
 }
 
@@ -405,6 +432,7 @@ function retryFaceScan() {
 function closeFaceScan() {
   document.getElementById("faceScanOverlay").classList.remove("open");
   stopFaceStream();
+  fetch(`${BACKEND_URL}/api/ai/resume`, { method: "POST" }).catch(() => {});
 }
 
 function stopFaceStream() {

@@ -11,6 +11,9 @@ A futuristic fitness dashboard designed for a Smart Mirror, featuring real-time 
     -   Real-time form correction feedback.
 -   **Dashboard Utilities**: Live clock, workout timer, and calorie tracking.
 -   **Real-time Integration**: Connects to a backend server via Socket.IO for live data streaming.
+-   **Face ID Authentication**: Register and log in with facial recognition via the Mrayti AI Biometrics Service.
+-   **Smart Pre-check**: Before face registration, the dashboard queries `GET /ai/faces/count` to detect existing face data and prompts the user before overwriting.
+-   **Camera Pause/Resume**: Before/after face registration, the dashboard calls `POST /api/ai/pause` and `POST /api/ai/resume` via the Node.js API to temporarily release the AI service's camera.
 
 ## Local Development
 

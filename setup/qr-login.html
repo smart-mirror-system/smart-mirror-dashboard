@@ -286,8 +286,8 @@ let socket = null;
 
 function connectSocket() {
   const socketOpts = DEVICE_TOKEN
-    ? { auth: { token: DEVICE_TOKEN }, transports: ["websocket"] }
-    : { transports: ["websocket"] };
+    ? { auth: { token: DEVICE_TOKEN }, transports: ["websocket"], path: "/api/socket.io" }
+    : { transports: ["websocket"], path: "/api/socket.io" };
 
   socket = io(BACKEND_URL, socketOpts);
 

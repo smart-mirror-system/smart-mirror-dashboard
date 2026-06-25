@@ -534,6 +534,7 @@
 
 <script src="../shared/toast.js"></script>
 <script src="../shared/navbar.js"></script>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
 // ════════════════════════════════════════
 // GLOBAL STATE
@@ -591,10 +592,24 @@ async function loadUserData() {
     const avatarSrc = profile.avatar || localStorage.getItem("sm_avatar");
     updateAvatarUI(avatarSrc, firstName || user.email?.split("@")[0] || "?");
 
-    // Face ID status
+    // Face ID status — verify against Qdrant
     if (profile.faceRegistered) {
-      faceRegistered = true;
-      updateFaceIdStatus(true);
+      try {
+        const fcRes = await fetch(`${BACKEND_URL}/ai/faces/count`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        const fcData = await fcRes.json();
+        if (fcData.exists) {
+          faceRegistered = true;
+          updateFaceIdStatus(true);
+        } else {
+          faceRegistered = false;
+          updateFaceIdStatus(false);
+        }
+      } catch {
+        faceRegistered = true;
+        updateFaceIdStatus(true);
+      }
     }
 
     // Cache user
@@ -708,35 +723,75 @@ function updateFaceIdStatus(registered) {
 }
 
 // ════════════════════════════════════════
-// FACE ID REGISTRATION
-// Flow:
-//  1. User clicks "Register Face"
-//  2. POST /api/face/registerFace  → Python AI starts capturing
-//  3. POST /api/face/trainFace     → train the model
-//  4. Update profile.faceRegistered = true in DB
+// FACE ID REGISTRATION — Mrayti AI Biometrics
+// POST /ai/register with captured frame
+// Also pauses gesture AI model during scan
 // ════════════════════════════════════════
  
 let faceRegisterStream = null;
+let faceRegisterCaptureCount = 0;
+const FACE_REGISTER_CAPTURES = 3; // capture 3 angles for robust matching
  
+function parseJwt(token) {
+  try {
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch (e) {
+    return null;
+  }
+}
+
 document.getElementById("btnRegisterFace").addEventListener("click", async () => {
-  // Show the webcam area below the face-id-zone
+  const claims = parseJwt(token);
+  if (!claims?.userId) {
+    toast.error("Invalid session. Please log in again.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/ai/faces/count`, {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    const data = await res.json();
+
+    if (data.exists && data.count > 0) {
+      if (!confirm(`You already have ${data.count} registered face pose(s). Re-registering will replace your existing face data. Continue?`)) {
+        return;
+      }
+
+      const delRes = await fetch(`${BACKEND_URL}/ai/faces/user/${claims.userId}`, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+      });
+
+      if (!delRes.ok && delRes.status !== 404) {
+        const delData = await delRes.json();
+        toast.error(delData.detail || "Failed to clear existing face data.");
+        return;
+      }
+
+      faceRegistered = false;
+      updateFaceIdStatus(false);
+    }
+  } catch (err) {
+    toast.error("Could not check face registration status.", "Error");
+    console.error(err);
+    return;
+  }
+
   showFaceRegisterUI();
 });
  
 function showFaceRegisterUI() {
-  // Reuse the existing webcam video element (already in profile.html)
-  // If not present, create a simple modal
   const zone = document.querySelector(".face-id-zone");
   if (!zone) return;
  
-  // Check if UI already injected
   if (document.getElementById("faceRegisterModal")) {
     document.getElementById("faceRegisterModal").style.display = "flex";
+    faceRegisterCaptureCount = 0;
     startFaceRegisterCapture();
     return;
   }
  
-  // Inject face register modal into DOM
   const modal = document.createElement("div");
   modal.id = "faceRegisterModal";
   modal.style.cssText = `
@@ -771,7 +826,36 @@ function showFaceRegisterUI() {
     </div>
   `;
   zone.insertAdjacentElement("afterend", modal);
+  faceRegisterCaptureCount = 0;
+  fetch(`${BACKEND_URL}/api/ai/pause`, { method: "POST" }).catch(() => {});
   startFaceRegisterCapture();
+}
+ 
+async function captureAndRegisterFace(statusEl, progressEl, progTimer) {
+  const video = document.getElementById("faceRegVideo");
+  if (!video) return false;
+ 
+  const cvs = document.createElement("canvas");
+  cvs.width = 480;
+  cvs.height = 480;
+  cvs.getContext("2d").drawImage(video, 0, 0, 480, 480);
+ 
+  const blob = await new Promise(resolve => cvs.toBlob(resolve, "image/jpeg"));
+  const formData = new FormData();
+  formData.append("file", blob, `face_${faceRegisterCaptureCount + 1}.jpg`);
+ 
+  const regRes = await fetch(`${BACKEND_URL}/ai/register`, {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + token },
+    body: formData,
+  });
+  const regData = await regRes.json();
+ 
+  if (!regData.success) {
+    throw new Error(regData.message || "Registration failed");
+  }
+ 
+  return regData;
 }
  
 async function startFaceRegisterCapture() {
@@ -804,35 +888,10 @@ async function startFaceRegisterCapture() {
         }, 150);
  
         try {
-          // Step 1: Register face with the AI server
-          // The Python server captures the face from its own camera
-          // We pass the user's ID and name
-          const userId = JSON.parse(localStorage.getItem("sm_user"))?._id || "";
-          const name   = document.getElementById("profileFirstName")?.value ||
-                         JSON.parse(localStorage.getItem("sm_user"))?.profile?.name || "User";
+          // Capture the face frame and POST directly to Mrayti AI Biometrics
+          await captureAndRegisterFace(statusEl, progressEl, progTimer);
  
-          const regRes  = await fetch(`${BACKEND_URL}/api/face/register`, {
-            method:  "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": "Bearer " + token,
-            },
-            body: JSON.stringify({ user_id: userId, name }),
-          });
-          const regData = await regRes.json();
- 
-          if (!regData.ok) throw new Error(regData.error || "Registration failed");
- 
-          // Step 2: Train the model
-          statusEl.textContent = "Training model...";
-          const trainRes  = await fetch(`${BACKEND_URL}/api/face/train`, {
-            method:  "POST",
-            headers: { "Authorization": "Bearer " + token },
-          });
-          const trainData = await trainRes.json();
-          if (!trainData.ok) throw new Error(trainData.error || "Training failed");
- 
-          // Step 3: Save faceRegistered = true in profile
+          // Save faceRegistered = true in user profile on the backend
           await fetch(`${BACKEND_URL}/api/user/setup`, {
             method:  "POST",
             headers: {
@@ -853,7 +912,6 @@ async function startFaceRegisterCapture() {
           updateFaceIdStatus(true);
           toast.success("Face ID registered! You can now log in with your face.", "Face ID");
  
-          // Close after 2s
           setTimeout(() => closeFaceRegisterUI(), 2000);
  
         } catch (err) {
@@ -877,6 +935,7 @@ async function startFaceRegisterCapture() {
  
 function closeFaceRegisterUI() {
   stopFaceRegisterStream();
+  fetch(`${BACKEND_URL}/api/ai/resume`, { method: "POST" }).catch(() => {});
   const modal = document.getElementById("faceRegisterModal");
   if (modal) modal.style.display = "none";
 }
