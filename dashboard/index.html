@@ -82,42 +82,40 @@
          Bottom: goal
          ══════════════════════════════════════ -->
 
-    <!-- COL 1 ROW 1 — Heart Rate -->
+    <!-- COL 1 ROW 1 — Media Player -->
     <div class="panel panel-health" id="healthPanel">
-      <div class="panel-title">Heart Rate</div>
-      <div class="vitals-row">
-        <div class="vital-item">
-          <div class="vital-value red-val" id="bpmVal">85</div>
-          <div class="vital-label">BPM</div>
+      <div class="panel-title">Media Player</div>
+      
+      <div class="media-player-content">
+        <!-- Current track name -->
+        <div class="track-info">
+          <div class="track-name" id="currentTrackName">القرآن الكريم - سورة البقرة</div>
+          <div class="track-artist" id="currentTrackArtist">الشيخ محمود خليل الحصري</div>
+          <div class="track-type" id="currentTrackType">Podcast / Audio</div>
         </div>
-        <div class="vital-unit">bpm</div>
-        <div class="v-sep"></div>
-        <div class="vital-item">
-          <div class="vital-value">99</div>
-          <div class="vital-label">SpO₂</div>
+
+        <!-- Control buttons -->
+        <div class="media-controls">
+          <button class="media-btn" id="mediaPrevBtn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+          </button>
+          <button class="media-btn play-pause-btn" id="mediaPlayBtn">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="media-btn" id="mediaNextBtn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M16 6h2v12h-2zm-11 12l8.5-6L5 6z"/></svg>
+          </button>
         </div>
-        <div class="vital-unit">%</div>
+
+        <!-- Progress bar -->
+        <div class="media-progress-container">
+          <span class="media-time">0:00</span>
+          <div class="media-progress-bar">
+            <div class="media-progress-fill" style="width: 35%;"></div>
+          </div>
+          <span class="media-time">03:19:17</span>
+        </div>
       </div>
-      <div class="chart-label">Live · BPM</div>
-      <div class="sparkline">
-        <svg viewBox="0 0 220 52" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="hrGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="rgba(255,77,106,0.3)"/>
-              <stop offset="100%" stop-color="rgba(255,77,106,0)"/>
-            </linearGradient>
-          </defs>
-          <path d="M0,42 L16,36 L32,32 L48,22 L62,28 L78,14 L92,22 L106,16 L122,8 L136,18 L150,14 L164,22 L178,12 L192,20 L206,26 L220,22"
-                fill="none" stroke="rgba(255,77,106,0.8)" stroke-width="1.8" class="hr-line"/>
-          <path d="M0,42 L16,36 L32,32 L48,22 L62,28 L78,14 L92,22 L106,16 L122,8 L136,18 L150,14 L164,22 L178,12 L192,20 L206,26 L220,22 L220,52 L0,52 Z"
-                fill="url(#hrGrad)" opacity="0.6"/>
-          <circle cx="220" cy="22" r="3.5" fill="#ff4d6a" opacity="0.9">
-            <animate attributeName="r" values="2;5;2" dur="1.6s" repeatCount="indefinite"/>
-            <animate attributeName="opacity" values="0.9;0.2;0.9" dur="1.6s" repeatCount="indefinite"/>
-          </circle>
-        </svg>
-      </div>
-      <div class="chart-axis"><span>0s</span><span>30s</span><span>60s</span></div>
     </div>
 
     <!-- COL 1 ROW 2 — Reps -->
@@ -170,7 +168,7 @@
         <!-- EXERCISE DEMO WITH MULTI-VIEW TOGGLE -->
         <!-- ════════════════════════════════════════ -->
         <div class="ex-demo-container">
-          <!-- سهم التنقل الأيسر -->
+          <!-- Left navigation arrow -->
           <button id="prevDemoBtn" class="demo-nav-btn prev" onclick="toggleDemoView(-1)">&lt;</button>
           
           <div class="ex-demo-wrap" id="exDemoWrap">
