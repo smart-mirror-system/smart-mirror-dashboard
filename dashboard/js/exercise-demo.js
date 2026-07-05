@@ -10,10 +10,10 @@
 const EXERCISES = {
   greeting: {
     label: "Welcome Athlete!",
-    primary:   [], // مفيش عضلات للترحيب
+    primary:   [], // No muscles for the greeting
     secondary: [],
     media: [
-      { src: "/smart-mirror-dashboard/assets/greeting.mp4", type: "video" } // فيديو الـ 3D اللي بيسلم
+      { src: "/smart-mirror-dashboard/assets/greeting.mp4", type: "video" } // 3D greeting video
     ]
   },
   pushup: {
