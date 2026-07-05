@@ -136,6 +136,7 @@ function connectSocket() {
   socket = io(BACKEND_URL, {
     auth: { token },
     transports: ["websocket"],
+    path: "/api/socket.io",
   });
 
   socket.on("connect", () => {
@@ -248,7 +249,7 @@ socket.on("workout:summary", (s) => {
 
       // 2. Add clapping video (make sure to place the clapping.mp4 file in the correct assets folder)
       const v = document.createElement("video");
-      v.src = "/smart-mirror-dashboard/assets/clapping.mp4";
+      v.src = "../assets/clapping.mp4";
       v.autoplay = true;
       v.loop = true;
       v.muted = true;

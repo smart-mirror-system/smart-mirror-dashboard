@@ -287,3 +287,17 @@ const socket = io('http://localhost:3000', {
 | Server → Client | `chat:chunk`      | `{ text }`                    | A streamed chunk of the AI's response.      |
 | Server → Client | `chat:reply:done` | `{ fullText }`                | Emitted when the full response is complete. |
 | Server → Client | `chat:error`      | `{ reason }` or `{ message }` | Emitted on validation or server errors.     |
+
+### 8. AI Pause/Resume (Camera Control)
+
+| Method | Endpoint          | Description                                                    |
+| :----- | :---------------- | :------------------------------------------------------------- |
+| `POST` | `/api/ai/pause`   | Pause the AI service's camera feed (for face registration).    |
+| `POST` | `/api/ai/resume`  | Resume the AI service's camera feed (after face registration). |
+
+**Response:**
+```json
+{ "ok": true }
+```
+
+> Called automatically by the face registration flow in `setup/profile.html` and `setup/sign-in.html`.

@@ -43,7 +43,8 @@ function init() {
 function initSocket() {
     socket = io(BACKEND_URL, {
         auth: { token },
-        transports: ["websocket"]
+        transports: ["websocket"],
+        path: "/api/socket.io",
     });
 
     socket.on("connect", () => console.log("Chatbot Socket Connected"));
