@@ -62,10 +62,10 @@ loadUser();
 // ════════════════════════════════════════
 // LIVE METRICS SIM (until real sensor connected)
 // ════════════════════════════════════════
-setInterval(() => {
-  const el = document.getElementById("bpmVal");
-  if (el) el.textContent = 76 + Math.floor(Math.random() * 22);
-}, 2200);
+// setInterval(() => {
+//   const el = document.getElementById("bpmVal");
+//   if (el) el.textContent = 76 + Math.floor(Math.random() * 22);
+// }, 2200);
 
 // ════════════════════════════════════════
 // WORKOUT TIMER
@@ -401,3 +401,164 @@ function drawSkeleton(canvas, pts) {
     ctx.shadowBlur  = 0;
   });
 }
+
+// ==========================================
+// ADVANCED DYNAMIC MEDIA PLAYER MODULE 
+// ==========================================
+
+// 1. Track playlist (manual duration removed completely)
+const playlist = [
+  { 
+    name: "القرآن الكريم - سورة النجم", 
+    artist: "الشيخ محمود خليل الحصري",
+    type: "Podcast / Audio", 
+    url: "/smart-mirror-dashboard/assets/audio/Najm.mp3" 
+  },
+  { 
+    name: "أذكار الصباح", 
+    artist: "مشاري بن راشد العفاسي",
+    type: "Audio", 
+    url: "/smart-mirror-dashboard/assets/audio/azkarSabah.mp3"
+  }
+];
+
+let currentTrackIndex = 0;
+let isPlaying = false;
+
+// Define audio object
+let audioPlayer = new Audio();
+
+// 2. Gather UI elements
+const trackNameEl       = document.getElementById("currentTrackName");
+const trackArtistEl     = document.getElementById("currentTrackArtist");
+const trackTypeEl       = document.getElementById("currentTrackType");
+const playBtn           = document.getElementById("mediaPlayBtn");
+const playIcon          = document.getElementById("playIcon");
+const prevBtn           = document.getElementById("mediaPrevBtn");
+const nextBtn           = document.getElementById("mediaNextBtn");
+const progressContainer = document.querySelector(".media-progress-container");
+const progressBar       = document.querySelector(".media-progress-bar"); // Progress bar element for seeking
+const progressFill      = document.querySelector(".media-progress-fill");
+
+// Helper function to format seconds as time (00:00)
+function formatTime(seconds) {
+  if (isNaN(seconds)) return "0:00";
+  let mins = Math.floor(seconds / 60);
+  let secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
+// 3. Update track UI details function
+function updatePlayerUI() {
+  const currentTrack = playlist[currentTrackIndex];
+  
+  if (trackNameEl) trackNameEl.textContent = currentTrack.name;
+  if (trackArtistEl) trackArtistEl.textContent = currentTrack.artist;
+  if (trackTypeEl) trackTypeEl.textContent = currentTrack.type;
+  
+  audioPlayer.pause();
+  audioPlayer.src = currentTrack.url;
+  audioPlayer.load(); 
+  
+  // Reset time display until the actual file duration loads
+  const timeLabels = document.querySelectorAll(".media-time");
+  if (timeLabels.length >= 2) {
+    timeLabels[0].textContent = "0:00";
+    timeLabels[1].textContent = "--:--"; // Will update automatically once metadata is loaded
+  }
+  if (progressFill) progressFill.style.width = "0%";
+}
+
+// ==========================================
+// 4. All the magic here: auto compute duration from the file
+// ==========================================
+audioPlayer.addEventListener("loadedmetadata", () => {
+  const timeLabels = document.querySelectorAll(".media-time");
+  if (timeLabels.length >= 2) {
+    // Read the file's actual duration and format it as time
+    timeLabels[1].textContent = formatTime(audioPlayer.duration);
+  }
+});
+
+// Update the progress bar and current time display during playback
+audioPlayer.addEventListener("timeupdate", () => {
+  if (audioPlayer.duration) {
+    const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+    if (progressFill) progressFill.style.width = `${progressPercent}%`;
+    
+    const timeLabels = document.querySelectorAll(".media-time");
+    if (timeLabels.length > 0) {
+      timeLabels[0].textContent = formatTime(audioPlayer.currentTime);
+    }
+  }
+});
+
+// When the track ends automatically, move to the next one
+audioPlayer.addEventListener("ended", () => {
+  if (nextBtn) nextBtn.click();
+});
+
+// ==========================================
+// 5. Seeking feature on the progress bar
+// ==========================================
+if (progressBar) {
+  // Change mouse cursor to pointer to indicate interactive seek bar
+  progressBar.style.cursor = "pointer";
+  
+  progressBar.addEventListener("click", (e) => {
+    if (audioPlayer.duration) {
+      // Compute the total width of the seek bar in pixels
+      const barWidth = progressBar.clientWidth;
+      // Find click position relative to the bar
+      const clickX = e.offsetX;
+      // Convert click position into a playback percentage
+      const clickPercent = clickX / barWidth;
+      
+      // Seek audio to the selected time
+      audioPlayer.currentTime = clickPercent * audioPlayer.duration;
+    }
+  });
+}
+
+// 6. Play/Pause button control
+if (playBtn) {
+  playBtn.addEventListener("click", () => {
+    isPlaying = !isPlaying;
+    
+    if (isPlaying) {
+      if (playIcon) playIcon.innerHTML = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`;
+      playBtn.style.borderColor = "#3ae7e1"; 
+      
+      audioPlayer.play().catch(err => {
+        console.warn("Autoplay blocked:", err);
+        isPlaying = false;
+        if (playIcon) playIcon.innerHTML = `<path d="M8 5v14l11-7z"/>`;
+        playBtn.style.borderColor = "rgba(58, 231, 225, 0.4)";
+      });
+    } else {
+      if (playIcon) playIcon.innerHTML = `<path d="M8 5v14l11-7z"/>`;
+      playBtn.style.borderColor = "rgba(58, 231, 225, 0.4)";
+      audioPlayer.pause();
+    }
+  });
+}
+
+// 7. Next and previous buttons
+if (nextBtn) {
+  nextBtn.addEventListener("click", () => {
+    currentTrackIndex = (currentTrackIndex + 1) < playlist.length ? currentTrackIndex + 1 : 0;
+    updatePlayerUI();
+    if (isPlaying) { isPlaying = false; playBtn.click(); }
+  });
+}
+
+if (prevBtn) {
+  prevBtn.addEventListener("click", () => {
+    currentTrackIndex = (currentTrackIndex - 1) >= 0 ? currentTrackIndex - 1 : playlist.length - 1;
+    updatePlayerUI();
+    if (isPlaying) { isPlaying = false; playBtn.click(); }
+  });
+}
+
+// Automatically load the first track when the mirror screen opens
+updatePlayerUI();
