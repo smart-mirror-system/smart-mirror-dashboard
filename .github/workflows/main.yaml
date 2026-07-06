@@ -52,16 +52,6 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Delete stale github-pages artifacts
-        run: |
-          echo "Cleaning up any stale github-pages artifacts..."
-          gh api /repos/${{ github.repository }}/actions/artifacts \
-            --jq '.artifacts[] | select(.name == "github-pages") | .id' | \
-            xargs -I {} gh api -X DELETE /repos/${{ github.repository }}/actions/artifacts/{}
-          sleep 5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Inject Production Configurations
         run: |
           find . -type f \( -name "*.js" -o -name "*.html" \) -exec sed -i "s|http://localhost:3000|${{ secrets.BACKEND_URL }}|g" {} +
