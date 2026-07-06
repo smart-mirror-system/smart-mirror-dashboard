@@ -247,7 +247,7 @@ document.getElementById("sessionDisplay").textContent = "Session: " + SESSION_ID
 document.getElementById("previewSession").textContent  = SESSION_ID.slice(0, 6);
 
 // ── Build mobile URL — points to sign-in.html with session param ──
-const mobileURL = `${SITE_ORIGIN}/smart-mirror-dashboard/setup/sign-in.html?session=${SESSION_ID}`;
+const mobileURL = `${SITE_ORIGIN}/setup/sign-in.html?session=${SESSION_ID}`;
 
 // ── Render QR code ──
 function renderQR() {
