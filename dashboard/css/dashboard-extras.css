@@ -28,18 +28,18 @@
    ════════════════════════════════════════ */
 .mirror-inner {
     display: grid;
-    grid-template-columns: 300px 1fr 300px; /* عمودين جانبيين ومساحة في النص للـ Skeleton */
+    grid-template-columns: 300px 1fr 300px; /* Two side columns and center space for the skeleton */
     grid-template-rows: repeat(4, auto);
     gap: 20px;
     padding: 20px;
     height: 100%;
 }
 
-/* 2. إلغاء أي تنسيقات فردية كانت تبوظ التوزيع */
+/* 2. Remove any individual styles that were breaking the layout */
 #timerPanel{
 position: static !important;
     width: 100% !important;
-    height: 140px !important; /* ارتفاع ثابت للكل */
+    height: 140px !important; /* Fixed height for all */
 }
   
 
@@ -239,11 +239,11 @@ position: static !important;
 }
 
 .demo-nav-btn {
-    display: block; /* بتظهر علطول ومتاحة للمستخدم */
+    display: block; /* Always visible and available to the user */
     position: absolute;
-    top: 40%; /* متناسبة مع الـ padding-top: 80% بتاع البوكس */
+    top: 40%; /* Aligned to the box's 80% padding-top */
     transform: translateY(-50%);
-    z-index: 20; /* أعلى من الميديا عشان تظهر فوق الـ GIF والفيديو */
+    z-index: 20; /* Above media so it appears on top of GIF and video */
     background: rgba(0, 0, 0, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #ffffff;
