@@ -302,7 +302,7 @@ function connectSocket() {
     // console.warn("QR socket error:", err?.message, "— falling back to polling");
     updateStatus("waiting", "Waiting for sign in");
     // FALLBACK: If socket connection fails, start polling every 2.5s to check if mobile authenticated
-    // startPollingFallback(); 
+    startPollingFallback(); 
   });
 
   // ── PRIMARY: Mirror receives this when mobile logs in ──
